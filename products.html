@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sản Phẩm — In A Jam</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FBF3E7;
+    --paper:#FFFDF8;
+    --ink:#3A2A22;
+    --ink-soft:#6B5A4F;
+    --marmalade:#C97B3D;
+    --marmalade-deep:#A85F28;
+    --plum:#6B3A5C;
+    --plum-soft:#8C5679;
+    --sage:#8A9B6E;
+    --mustard:#E3A857;
+    --line: rgba(58,42,34,0.12);
+    --footer-brown:#4B3A26;
+    --radius: 22px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Be Vietnam Pro', sans-serif;
+    font-weight:400;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,h4{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    color:var(--ink);
+  }
+  a{text-decoration:none; color:inherit;}
+  img{max-width:100%; display:block;}
+  ::selection{background:var(--mustard); color:var(--ink);}
+  button{font-family:inherit;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+
+  /* ---------- NAV ---------- */
+  header{
+    position:sticky; top:0; z-index:100;
+    background:rgba(251,243,231,0.9);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-wrap{
+    max-width:1200px; margin:0 auto;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px;
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Fraunces',serif; font-weight:700; font-size:1.3rem;
+    color:var(--marmalade-deep);
+  }
+  .logo-mark{
+    width:38px; height:38px; border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, var(--mustard), var(--marmalade));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-weight:700; color:var(--paper); font-size:.85rem;
+    box-shadow:0 3px 8px rgba(169,95,40,.35);
+  }
+  nav ul{list-style:none; display:flex; gap:26px; align-items:center;}
+  nav a{font-size:.92rem; font-weight:500; color:var(--ink-soft); transition:color .2s;}
+  nav a:hover, nav a.active{color:var(--marmalade-deep);}
+  .nav-icons{display:flex; align-items:center; gap:16px;}
+  .icon-btn{
+    position:relative; width:38px; height:38px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--line); background:var(--paper); cursor:pointer;
+    transition:transform .15s, border-color .15s;
+  }
+  .icon-btn:hover{transform:translateY(-2px); border-color:var(--marmalade);}
+  .cart-badge{
+    position:absolute; top:-6px; right:-6px;
+    background:var(--plum); color:#fff; font-size:.65rem; font-weight:700;
+    min-width:18px; height:18px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; padding:0 3px;
+  }
+  @media (max-width: 860px){ nav ul{display:none;} }
+
+  /* ---------- PAGE HERO ---------- */
+  .page-hero{
+    padding:72px 24px 24px;
+    text-align:center;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(227,168,87,0.28), transparent 55%),
+      radial-gradient(ellipse at 85% 20%, rgba(107,58,92,0.16), transparent 55%),
+      var(--cream);
+  }
+  .eyebrow{
+    font-size:.78rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--marmalade-deep); font-weight:600; margin-bottom:14px;
+  }
+  .page-hero h1{ font-size:clamp(1.9rem, 4vw, 2.7rem); max-width:720px; margin:0 auto 16px; }
+  .page-hero p{ max-width:560px; margin:0 auto; color:var(--ink-soft); font-size:1.02rem; }
+  .page-hero .tagline{
+    font-family:'Fraunces',serif; font-style:italic; color:var(--marmalade-deep);
+    margin-top:18px; font-size:1.15rem;
+  }
+
+  section{ padding:56px 24px 104px; position:relative; }
+  .section-inner{ max-width:1180px; margin:0 auto; }
+
+  /* ---------- JAR ROW ---------- */
+  .jar-row{
+    display:flex; justify-content:center; align-items:flex-end;
+    gap:8px; flex-wrap:wrap; padding:20px 0 8px;
+  }
+  .jar-pick{
+    width:230px; padding:26px 18px 22px; text-align:center; cursor:pointer;
+    border:none; background:transparent;
+    border-radius:26px;
+    transition:transform .45s cubic-bezier(.22,1,.36,1), opacity .4s ease;
+    position:relative;
+  }
+  .jar-row.hovering .jar-pick{ opacity:.55; transform:scale(.94); }
+  .jar-row.hovering .jar-pick:hover,
+  .jar-row.hovering .jar-pick.active{ opacity:1; transform:scale(1.12) translateY(-10px); z-index:2; }
+  .jar-pick.active{ opacity:1; }
+  .jar-pick .jar-shadow{
+    position:absolute; left:50%; bottom:8px; width:120px; height:16px;
+    transform:translateX(-50%); border-radius:50%;
+    background:radial-gradient(ellipse, rgba(58,42,34,.16), transparent 70%);
+    opacity:0; transition:opacity .4s;
+  }
+  .jar-row.hovering .jar-pick:hover .jar-shadow,
+  .jar-row.hovering .jar-pick.active .jar-shadow{ opacity:1; }
+  .jar-pick svg{ height:150px; display:block; margin:0 auto 14px; filter:drop-shadow(0 10px 16px rgba(58,42,34,.16)); }
+  .jar-pick .jar-name{ font-size:1.05rem; margin-bottom:4px; }
+  .jar-pick .jar-sub{ font-size:.82rem; color:var(--ink-soft); font-style:italic; }
+  .jar-hint{
+    text-align:center; color:var(--ink-soft); font-size:.86rem; margin-top:6px;
+    opacity:0; transition:opacity .3s;
+  }
+  .jar-hint.show{ opacity:1; }
+
+  /* ---------- DETAIL PANEL ---------- */
+  .detail{
+    max-height:0; overflow:hidden; opacity:0;
+    transition:max-height .6s cubic-bezier(.22,1,.36,1), opacity .5s ease, margin .5s ease;
+    margin-top:0;
+  }
+  .detail.open{ max-height:2400px; opacity:1; margin-top:36px; }
+  .detail-card{
+    background:var(--paper); border:1px solid var(--line); border-radius:32px;
+    padding:44px; display:grid; grid-template-columns:1.05fr 0.95fr; gap:52px;
+    box-shadow:0 30px 60px rgba(58,42,34,.10);
+  }
+  @media (max-width:920px){ .detail-card{grid-template-columns:1fr; padding:28px;} }
+
+  /* left column */
+  .detail-visual{ text-align:center; }
+  .detail-visual .big-jar{
+    width:100%; max-width:260px; margin:0 auto 8px;
+  }
+  .detail-visual .big-jar svg{ width:100%; height:auto; filter:drop-shadow(0 16px 22px rgba(58,42,34,.18)); }
+  .detail-name{ font-size:1.5rem; margin-top:10px; }
+  .detail-tagline{
+    font-family:'Fraunces',serif; font-style:italic; color:var(--marmalade-deep);
+    font-size:1.1rem; margin-bottom:20px;
+  }
+  .detail-story{ text-align:left; color:var(--ink-soft); font-size:.94rem; }
+  .detail-story p{ margin-bottom:12px; }
+  .detail-story .quote{
+    font-family:'Fraunces',serif; font-style:italic; color:var(--ink);
+    font-size:1.02rem; margin:16px 0; line-height:1.5;
+  }
+  .detail-story .closer{
+    font-weight:600; color:var(--marmalade-deep); font-style:normal;
+  }
+
+  /* right column - customization */
+  .customize h3{ font-size:1.15rem; margin-bottom:22px; }
+  .opt-group{ margin-bottom:26px; }
+  .opt-label{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-size:.86rem; font-weight:600; color:var(--ink); margin-bottom:10px;
+    text-transform:uppercase; letter-spacing:.04em;
+  }
+  .opt-label span.val{ color:var(--marmalade-deep); text-transform:none; letter-spacing:0; font-weight:600; }
+  .opt-pills{ display:flex; flex-wrap:wrap; gap:8px; }
+  .pill{
+    border:1.5px solid var(--line); background:var(--cream); color:var(--ink-soft);
+    padding:9px 16px; border-radius:999px; font-size:.86rem; font-weight:500;
+    cursor:pointer; transition:all .2s ease;
+  }
+  .pill:hover{ border-color:var(--marmalade); color:var(--ink); }
+  .pill.selected{
+    background:var(--ink); border-color:var(--ink); color:var(--paper);
+  }
+  .pill.mix-pill.selected{
+    background:var(--marmalade-deep); border-color:var(--marmalade-deep);
+  }
+  .mix-swatch{
+    display:inline-block; width:9px; height:9px; border-radius:50%;
+    margin-right:7px; vertical-align:middle;
+  }
+
+  .add-cart-btn{
+    width:100%; margin-top:8px;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    background:var(--ink); color:var(--paper);
+    padding:16px 20px; border:none; border-radius:999px;
+    font-weight:600; font-size:1rem; cursor:pointer;
+    transition:background .25s, transform .2s;
+  }
+  .add-cart-btn:hover{ background:var(--marmalade-deep); transform:translateY(-2px); }
+  .add-cart-btn.added{ background:var(--sage); }
+
+  .price-line{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:18px; padding-bottom:18px; border-bottom:1px dashed var(--line);
+  }
+  .price-line .price{ font-family:'Fraunces',serif; font-weight:700; font-size:1.3rem; color:var(--ink); }
+
+  .close-detail{
+    display:block; margin:26px auto 0; background:none; border:none;
+    color:var(--ink-soft); font-size:.86rem; cursor:pointer; text-decoration:underline;
+  }
+  .close-detail:hover{ color:var(--marmalade-deep); }
+
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- FOOTER ---------- */
+  footer{ background:var(--footer-brown); color:#EFE3D3; padding:56px 24px 26px; }
+  .footer-inner{
+    max-width:1120px; margin:0 auto; display:grid;
+    grid-template-columns:1.2fr 1fr 1fr; gap:40px;
+  }
+  @media (max-width:760px){ .footer-inner{grid-template-columns:1fr;} }
+  .footer-wordmark{ font-family:'Fraunces',serif; font-weight:700; font-size:1.3rem; color:#fff; }
+  .footer-tagline{ font-size:.88rem; opacity:.75; margin-top:6px; }
+  .footer-col h5{ font-family:'Be Vietnam Pro',sans-serif; font-size:.9rem; text-transform:uppercase; letter-spacing:.08em; margin-bottom:14px; opacity:.85;}
+  .footer-col ul.plain{ list-style:none; font-size:.88rem; opacity:.85; line-height:1.9; }
+  .footer-bottom{ text-align:center; font-size:.78rem; opacity:.55; margin-top:40px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-wrap">
+    <a href="index.html" class="logo">
+      <span class="logo-mark">IJ</span>
+      In A Jam
+    </a>
+    <nav>
+      <ul>
+        <li><a href="index.html">Trang chủ</a></li>
+        <li><a href="about.html">Về In A Jam</a></li>
+        <li><a href="product.html" class="active">Sản Phẩm</a></li>
+        <li><a href="index.html#tarot">Tarot</a></li>
+        <li><a href="index.html#contact-anchor">Liên Hệ</a></li>
+      </ul>
+    </nav>
+    <div class="nav-icons">
+      <a class="icon-btn" title="Đăng nhập" href="#">👤</a>
+      <a class="icon-btn" title="Giỏ hàng" href="#">
+        🧺
+        <span class="cart-badge" id="cartBadge">0</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ================= PAGE HERO ================= -->
+<section class="page-hero" style="padding-bottom:0;">
+  <div class="eyebrow">Bộ Sưu Tập</div>
+  <h1>Chọn một ly trà, chọn một trạng thái cảm xúc</h1>
+  <p>Mỗi ly trà mứt là một khoảng nghỉ nhỏ cho một cảm giác "overwhelmed" rất riêng. Chạm vào ly trà đang gọi tên bạn hôm nay để nghe câu chuyện của nó.</p>
+  <p class="tagline">Gác lại bộn bề, tìm về thảnh thơi.</p>
+</section>
+
+<!-- ================= PRODUCTS ================= -->
+<section id="products">
+  <div class="section-inner">
+
+    <div class="jar-row" id="jarRow"></div>
+    <p class="jar-hint" id="jarHint">Chạm vào một ly trà để mở câu chuyện và tự pha chế ly của riêng bạn ✦</p>
+
+    <div class="detail" id="detailPanel"></div>
+
+  </div>
+</section>
+
+<footer id="contact-anchor">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-wordmark">In A Jam</div>
+      <div class="footer-tagline">Gác lại bộn bề, tìm về thảnh thơi</div>
+    </div>
+    <div class="footer-col">
+      <h5>Liên hệ</h5>
+      <ul class="plain">
+        <li>SĐT: 0365 655 839 (Phương Nhi)</li>
+        <li>Email: jamtea.healing@gmail.com</li>
+        <li>279 Nguyễn Tri Phương, P. Diên Hồng, TP.HCM</li>
+        <li>07:00 – 16:00 (Thứ năm – Thứ hai)</li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Khám phá</h5>
+      <ul class="plain">
+        <li><a href="index.html">Trang chủ</a></li>
+        <li><a href="about.html">Về In A Jam</a></li>
+        <li><a href="product.html">Sản phẩm</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 In A Jam. All rights reserved.</div>
+</footer>
+
+<script>
+/* ============ CART: persistence via window.storage (đồng bộ với index.html) ============ */
+const CART_KEY = 'iaj-cart-items';
+
+async function getCart(){
+  try{
+    const res = await window.storage.get(CART_KEY);
+    return res ? JSON.parse(res.value) : [];
+  }catch(e){ return []; }
+}
+async function saveCart(items){
+  try{ await window.storage.set(CART_KEY, JSON.stringify(items)); }
+  catch(e){ console.error('Không thể lưu giỏ hàng', e); }
+}
+async function addToCart(item){
+  const items = await getCart();
+  items.push(item);
+  await saveCart(items);
+  updateBadge(items);
+}
+function updateBadge(items){
+  const count = items.reduce((s,i)=>s+(i.qty||1),0);
+  document.getElementById('cartBadge').textContent = count;
+}
+(async ()=>{ updateBadge(await getCart()); })();
+
+/* ============ PRODUCT DATA ============ */
+const PRODUCTS = [
+  {
+    id:'xoai', emoji:'🥭', name:'Trà Mứt Xoài', sub:'Xoa dịu quá tải',
+    color:'#E3A857', price:30000,
+    story:[
+      `Có những ngày, mọi thứ đều chỉ là "một chút".`,
+      `Một chút áp lực từ bài tập chưa xong. Một chút lo lắng vì công việc còn dang dở. Một chút kỳ vọng từ mọi người. Một chút tự trách vì bản thân vẫn chưa đủ tốt.`,
+      `Chẳng điều gì quá lớn để khiến bạn gục ngã. Nhưng từng "một chút" ấy cứ âm thầm chất chồng, đến khi bạn nhận ra mình đã kiệt sức lúc nào không hay.`,
+      `In A Jam tin rằng, không phải ngày nào cũng cần một bước ngoặt lớn để mọi thứ trở nên tốt hơn. Đôi khi, chỉ cần một khoảng dừng vừa đủ cũng có thể khiến lòng mình nhẹ đi đôi chút.`,
+      `Trà đen mứt xoài được tạo nên cho những ngày như thế. Vị trà đen dịu nhẹ hòa quyện cùng mứt xoài ngọt thanh như một lời nhắc hãy chậm lại, hít một hơi thật sâu và xoa dịu chính mình trước khi tiếp tục cố gắng.`
+    ],
+    closer:'Bởi bạn không cần phải luôn mạnh mẽ. Và đôi khi, điều đáng được ưu tiên nhất trong danh sách hôm nay... chính là bạn.'
+  },
+  {
+    id:'chanhday', emoji:'💛', name:'Trà Mứt Chanh Dây', sub:'Nạp lại năng lượng',
+    color:'#C97B3D', price:30000,
+    story:[
+      `Một buổi sáng thức dậy với danh sách dài những việc cần làm, nhưng lại chẳng còn động lực để bắt đầu.`,
+      `Không phải vì bạn lười biếng, mà là vì bạn đã cố gắng quá lâu mà chưa kịp nghỉ ngơi. Có những ngày, điều mệt nhất không phải là những việc bạn phải làm, mà là việc bạn vẫn phải tiếp tục khi năng lượng đã cạn.`,
+      `In A Jam hiểu điều đó. Chúng mình tin rằng ai cũng cần một khoảng thời gian để nạp lại năng lượng trước khi bắt đầu một ngày mới với vô vàn những khó khăn và thử thách.`,
+      `Trà Mứt Chanh Dây với sự kết hợp giữa nền trà đen dịu nhẹ và mứt chanh dây chua ngọt mang đến cảm giác tươi mới trong từng ngụm, như một khoảng nghỉ nhỏ giúp bạn lấy lại tinh thần để tiếp tục hành trình của mình.`
+    ],
+    closer:'Bởi đôi khi, chỉ cần dành cho bản thân vài phút nghỉ ngơi cũng đủ để một ngày mới bắt đầu theo cách nhẹ nhàng hơn.'
+  },
+  {
+    id:'thom', emoji:'🍍', name:'Trà Mứt Thơm', sub:'Tận hưởng những khoảnh khắc hiện tại',
+    color:'#8A9B6E', price:30000,
+    story:[
+      `Có bao lâu rồi bạn chưa thật sự tận hưởng một ngày của mình?`,
+      `Chúng ta luôn tất bật chạy theo những buổi học, những cuộc họp, những deadline và cả những kế hoạch còn dang dở. Mỗi ngày đều bận rộn đến mức một bữa ăn vội, một buổi chiều nhiều nắng hay một cuộc trò chuyện ngắn với bạn bè cũng dễ dàng bị bỏ lỡ.`,
+      `Đôi khi, điều cuộc sống lấy đi không phải là thời gian, mà là khả năng cảm nhận những điều đẹp đẽ vẫn luôn hiện diện quanh mình.`,
+      `In A Jam tin rằng, hạnh phúc không phải lúc nào cũng đến từ những điều lớn lao. Đôi khi, chỉ cần cho phép mình chậm lại một chút, bạn sẽ nhận ra một ngày bình thường cũng có thể trở nên thật dễ chịu.`,
+      `Trà đen mứt thơm với vị ngọt thanh hòa quyện cùng nền trà đen dịu nhẹ mang đến cảm giác tươi mới trong từng ngụm, như một lời mời bạn tạm gác nhịp sống vội vã để tận hưởng trọn vẹn khoảnh khắc hiện tại.`
+    ],
+    closer:'Vì đôi khi, khoảng nghỉ nhỏ nhất lại là điều khiến cả một ngày trở nên đáng nhớ.'
+  },
+  {
+    id:'man', emoji:'🍑', name:'Trà Mứt Mận', sub:'Dịu dàng với chính mình',
+    color:'#6B3A5C', price:30000,
+    story:[
+      `Có bao giờ bạn cảm thấy, dù đã cố gắng rất nhiều, bản thân vẫn chưa đủ?`,
+      `Chưa đủ giỏi để đạt được điều mình mong muốn. Chưa đủ nhanh để theo kịp mọi người. Chưa đủ xuất sắc khi nhìn vào những thành tựu của người khác.`,
+      `Rồi dần dần, bạn quên mất cách ghi nhận những nỗ lực của chính mình. Bạn chỉ mải miết nhìn về những điều còn thiếu, mà quên rằng mình đã đi được một quãng đường rất dài.`,
+      `In A Jam tin rằng, bạn không cần phải trở thành phiên bản hoàn hảo mới xứng đáng được yêu thương và vỗ về. Bởi mỗi bước tiến, dù nhỏ đến đâu, cũng là một điều đáng tự hào.`,
+      `Trà Mứt Mận với sự kết hợp của nền trà đen dịu nhẹ hòa quyện cùng mứt mận ngọt ngào như một lời nhắc dịu dàng: hãy thôi khắt khe với bản thân, chậm lại một chút và dành cho mình sự công nhận mà bấy lâu nay bạn vẫn luôn dành cho người khác.`
+    ],
+    closer:'Vì đôi khi, điều đẹp nhất không phải là cứ cố gắng chạy theo những tiêu chuẩn ngoài kia, mà là học cách trân trọng chính bản thân mình ngay ở hiện tại.'
+  }
+];
+
+const SWEETNESS = ['0%','25%','50%','75%','100%'];
+const ICE = ['Không đá','Ít đá','Đá vừa','Nhiều đá'];
+const MIX_OPTIONS = [
+  {id:'none', label:'Không thêm mứt', color:null},
+  {id:'xoai', label:'Mứt xoài', color:'#E3A857'},
+  {id:'chanhday', label:'Mứt chanh dây', color:'#C97B3D'},
+  {id:'thom', label:'Mứt thơm', color:'#8A9B6E'},
+  {id:'man', label:'Mứt mận', color:'#6B3A5C'}
+];
+
+/* ============ JAR SVG (ly nhựa trong suốt) ============ */
+function jarSVG(color, id){
+  const gid = 'liq-' + id;
+  return `
+  <svg viewBox="0 0 120 190" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${color}" stop-opacity="0.95"/>
+        <stop offset="100%" stop-color="${color}" stop-opacity="0.8"/>
+      </linearGradient>
+    </defs>
+    <!-- lid dome -->
+    <ellipse cx="60" cy="26" rx="34" ry="11" fill="#ffffff" opacity="0.55" stroke="${color}" stroke-width="1.5"/>
+    <!-- straw -->
+    <rect x="66" y="4" width="7" height="34" rx="3.5" fill="${color}" opacity="0.85" transform="rotate(8 69 20)"/>
+    <!-- cup body (trapezoid, wider at top) -->
+    <path d="M32 34 L88 34 L80 172 Q80 180 72 180 L48 180 Q40 180 40 172 Z"
+          fill="#ffffff" opacity="0.25" stroke="${color}" stroke-width="2"/>
+    <!-- liquid fill -->
+    <path d="M35 60 L85 60 L79.5 170 Q79.5 177 72 177 L48 177 Q40.5 177 40.5 170 Z" fill="url(#${gid})"/>
+    <!-- fruit bits -->
+    <circle cx="55" cy="120" r="5" fill="#ffffff" opacity="0.5"/>
+    <circle cx="68" cy="140" r="4" fill="#ffffff" opacity="0.4"/>
+    <circle cx="58" cy="155" r="3.5" fill="#ffffff" opacity="0.4"/>
+    <!-- shine -->
+    <path d="M40 66 L44 165" stroke="#ffffff" stroke-opacity="0.55" stroke-width="3" stroke-linecap="round"/>
+    <!-- rim highlight -->
+    <ellipse cx="60" cy="34" rx="28" ry="7" fill="#ffffff" opacity="0.5"/>
+  </svg>`;
+}
+
+/* ============ RENDER JAR ROW ============ */
+const jarRow = document.getElementById('jarRow');
+const jarHint = document.getElementById('jarHint');
+let activeId = null;
+
+function renderJars(){
+  jarRow.innerHTML = PRODUCTS.map(p => `
+    <button class="jar-pick" data-id="${p.id}" aria-label="${p.name}">
+      <div class="jar-shadow"></div>
+      ${jarSVG(p.color, p.id)}
+      <div class="jar-name">${p.emoji} ${p.name}</div>
+      <div class="jar-sub">${p.sub}</div>
+    </button>
+  `).join('');
+
+  jarRow.querySelectorAll('.jar-pick').forEach(btn=>{
+    btn.addEventListener('mouseenter', ()=> jarRow.classList.add('hovering'));
+    btn.addEventListener('mouseleave', ()=> jarRow.classList.remove('hovering'));
+    btn.addEventListener('click', ()=> selectProduct(btn.dataset.id));
+  });
+
+  jarRow.addEventListener('mouseleave', ()=> jarRow.classList.remove('hovering'));
+}
+renderJars();
+
+/* ============ CUSTOMIZATION STATE ============ */
+const state = { sweet: '75%', ice: 'Đá vừa', mix: 'none' };
+
+function pillGroup(name, options, current, renderLabel){
+  return options.map(opt=>{
+    const val = typeof opt === 'string' ? opt : opt.id;
+    const label = renderLabel ? renderLabel(opt) : opt;
+    const selected = val === current ? 'selected' : '';
+    const mixClass = name === 'mix' ? 'mix-pill' : '';
+    return `<button type="button" class="pill ${mixClass} ${selected}" data-group="${name}" data-val="${val}">${label}</button>`;
+  }).join('');
+}
+
+function renderDetail(product){
+  const panel = document.getElementById('detailPanel');
+  const storyHtml = product.story.map(p => `<p>${p}</p>`).join('');
+
+  panel.innerHTML = `
+    <div class="detail-card">
+      <div class="detail-visual">
+        <div class="big-jar">${jarSVG(product.color, 'big-' + product.id)}</div>
+        <h2 class="detail-name">${product.emoji} ${product.name}</h2>
+        <div class="detail-tagline">${product.sub}</div>
+        <div class="detail-story">
+          ${storyHtml}
+          <p class="quote closer">${product.closer}</p>
+        </div>
+      </div>
+
+      <div class="customize">
+        <div class="price-line">
+          <h3 style="margin:0;">Tùy chỉnh ly của bạn</h3>
+          <span class="price">${product.price.toLocaleString('vi-VN')}₫</span>
+        </div>
+
+        <div class="opt-group">
+          <div class="opt-label">Độ ngọt <span class="val" id="sweetVal">${state.sweet}</span></div>
+          <div class="opt-pills" id="sweetPills">${pillGroup('sweet', SWEETNESS, state.sweet)}</div>
+        </div>
+
+        <div class="opt-group">
+          <div class="opt-label">Lượng đá <span class="val" id="iceVal">${state.ice}</span></div>
+          <div class="opt-pills" id="icePills">${pillGroup('ice', ICE, state.ice)}</div>
+        </div>
+
+        <div class="opt-group">
+          <div class="opt-label">Chọn thêm một vị mứt để mix</div>
+          <div class="opt-pills" id="mixPills">${pillGroup('mix', MIX_OPTIONS, state.mix, opt => (opt.color ? `<span class="mix-swatch" style="background:${opt.color}"></span>` : '') + opt.label)}</div>
+        </div>
+
+        <button class="add-cart-btn" id="addCartBtn">🛒 Thêm vào giỏ hàng</button>
+        <button class="close-detail" id="closeDetailBtn">Đóng lại</button>
+      </div>
+    </div>
+  `;
+
+  panel.querySelectorAll('.pill').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const group = btn.dataset.group;
+      const val = btn.dataset.val;
+      if(group === 'sweet'){ state.sweet = val; document.getElementById('sweetVal').textContent = val; }
+      if(group === 'ice'){ state.ice = val; document.getElementById('iceVal').textContent = val; }
+      if(group === 'mix'){ state.mix = val; }
+      panel.querySelectorAll(`.pill[data-group="${group}"]`).forEach(p=>p.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+  });
+
+  document.getElementById('closeDetailBtn').addEventListener('click', ()=> selectProduct(null));
+
+  document.getElementById('addCartBtn').addEventListener('click', async ()=>{
+    const mixLabel = MIX_OPTIONS.find(m=>m.id===state.mix).label;
+    await addToCart({
+      id: product.id + '-' + Date.now(),
+      name: product.name,
+      price: product.price,
+      qty: 1,
+      sweet: state.sweet,
+      ice: state.ice,
+      mix: mixLabel
+    });
+    const btn = document.getElementById('addCartBtn');
+    btn.classList.add('added');
+    btn.textContent = '✓ Đã thêm vào giỏ';
+    setTimeout(()=>{ btn.classList.remove('added'); btn.textContent = '🛒 Thêm vào giỏ hàng'; }, 1200);
+  });
+}
+
+function selectProduct(id){
+  activeId = id;
+  jarRow.querySelectorAll('.jar-pick').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.id === id);
+  });
+
+  const panel = document.getElementById('detailPanel');
+  if(!id){
+    panel.classList.remove('open');
+    jarHint.classList.remove('show');
+    return;
+  }
+  jarHint.classList.add('show');
+  // reset customization defaults for each newly opened product
+  state.sweet = '75%'; state.ice = 'Đá vừa'; state.mix = 'none';
+  const product = PRODUCTS.find(p => p.id === id);
+  renderDetail(product);
+  panel.classList.add('open');
+  setTimeout(()=>{
+    panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }, 150);
+}
+</script>
+</body>
+</html>
