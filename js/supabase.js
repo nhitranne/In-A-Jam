@@ -7,7 +7,7 @@ const SUPABASE_URL = "https://ipdtylgintyociozcpbi.supabase.co";
 const SUPABASE_ANON_KEY =
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlwZHR5bGdpbnR5b2Npb3pjcGJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyMjU1MTUsImV4cCI6MjA5ODgwMTUxNX0.2QenADIXuGpAveJ88QJfRYy2-Vp3Bu8GckCp1XHytNw";
 
-const supabase = window.supabase.createClient(
+const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY
 );
@@ -21,7 +21,7 @@ async function getCurrentUser() {
     const {
         data: { user },
         error
-    } = await supabase.auth.getUser();
+    } = await supabaseClient.auth.getUser();
 
     if (error) {
         console.error(error.message);
@@ -37,7 +37,7 @@ async function getSession() {
     const {
         data,
         error
-    } = await supabase.auth.getSession();
+    } = await supabaseClient.auth.getSession();
 
     if (error) {
 
@@ -58,7 +58,7 @@ async function getSession() {
 
 async function logout() {
 
-    await supabase.auth.signOut();
+    await supabaseClient.auth.signOut();
 
     window.location.href = "index.html";
 
@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", async () => {
    EXPORT
 =========================================== */
 
-window.supabaseClient = supabase;
+window.supabaseClient = supabaseClient;
 
 window.logout = logout;
 
