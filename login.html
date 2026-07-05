@@ -723,97 +723,10 @@ async function renderAccountIcon(){
 }
 renderAccountIcon();
 
-
-/* ============ AUTH FORM LOGIC ============ */
-const loginCard = document.getElementById('loginCard');
-const registerCard = document.getElementById('registerCard');
-const dashCard = document.getElementById('dashCard');
-
-document.getElementById('showRegister').addEventListener('click', (e)=>{
-  e.preventDefault(); loginCard.style.display='none'; registerCard.style.display='block';
-});
-document.getElementById('showLogin').addEventListener('click', (e)=>{
-  e.preventDefault(); registerCard.style.display='none'; loginCard.style.display='block';
-});
-document.getElementById('forgotPasswordLink').addEventListener('click', (e)=>{
-  e.preventDefault();
-  alert('Vui lòng liên hệ In A Jam qua trang Liên Hệ để được hỗ trợ đặt lại mật khẩu.');
-});
-
-async function showDashboard(user){
-  loginCard.style.display='none';
-  registerCard.style.display='none';
-  dashCard.style.display='block';
-  document.getElementById('dashAvatar').textContent = (user.firstName||'?').charAt(0).toUpperCase();
-  document.getElementById('dashName').textContent = `${user.firstName||''} ${user.lastName||''}`.trim();
-  document.getElementById('dashEmail').textContent = user.email||'';
-}
-
-document.getElementById('loginForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-  const password = document.getElementById('loginPassword').value;
-  const usersRes = await window.storage.get('iaj-users-db').catch(()=>null);
-  const users = usersRes ? JSON.parse(usersRes.value) : {};
-  const match = users[email];
-  const errEl = document.getElementById('loginError');
-  if(match && match.password === password){
-    errEl.classList.remove('show');
-    await setUser(match);
-    showDashboard(match);
-  } else {
-    errEl.classList.add('show');
-  }
-});
-
-document.getElementById('registerForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const lastName = document.getElementById('regLastName').value.trim();
-  const firstName = document.getElementById('regFirstName').value.trim();
-  const email = document.getElementById('regEmail').value.trim().toLowerCase();
-  const phone = document.getElementById('regPhone').value.trim();
-  const password = document.getElementById('regPassword').value;
-  const confirm = document.getElementById('regConfirm').value;
-  const errEl = document.getElementById('registerError');
-
-  if(password !== confirm || password.length < 6){
-    errEl.textContent = 'Mật khẩu xác nhận chưa khớp hoặc mật khẩu cần tối thiểu 6 ký tự.';
-    errEl.classList.add('show');
-    return;
-  }
-
-  let users = {};
-  try{
-    const usersRes = await window.storage.get('iaj-users-db');
-    users = usersRes ? JSON.parse(usersRes.value) : {};
-  }catch(e){ users = {}; }
-
-  if(users[email]){
-    errEl.textContent = 'Email này đã được đăng ký. Vui lòng đăng nhập.';
-    errEl.classList.add('show');
-    return;
-  }
-
-  errEl.classList.remove('show');
-  const newUser = { lastName, firstName, email, phone, password };
-  users[email] = newUser;
-  await window.storage.set('iaj-users-db', JSON.stringify(users));
-  await setUser(newUser);
-  showDashboard(newUser);
-});
-
-document.getElementById('dashLogout').addEventListener('click', async ()=>{
-  await clearUser();
-  dashCard.style.display='none';
-  loginCard.style.display='block';
-});
-
-(async ()=>{
-  const current = await getUser();
-  if(current) showDashboard(current);
-})();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
+<script src="js/auth-register.js"></script>
+<script src="js/auth-login.js"></script>
 </body>
 </html>

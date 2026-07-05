@@ -407,12 +407,21 @@
       </ul>
     </nav>
     <div class="nav-icons">
-      <a class="icon-btn" title="Đăng nhập" href="#login-anchor">👤</a>
-      <a class="icon-btn" title="Giỏ hàng" href="#cart-anchor">
-        🧺
-        <span class="cart-badge" id="cartBadge">0</span>
-      </a>
-    </div>
+
+  <div class="account-wrap" id="accountWrap">
+
+    <a class="icon-btn" title="Đăng nhập" href="login.html">
+      👤
+    </a>
+
+  </div>
+
+  <a class="icon-btn" title="Giỏ hàng" href="cart.html">
+    🧺
+    <span class="cart-badge" id="cartBadge">0</span>
+  </a>
+
+</div>
   </div>
 </header>
 
@@ -639,5 +648,7 @@ if (reshuffleBtn) {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
+<script src="js/profile.js"></script>
+<script src="js/auth-login.js"></script>
 </body>
 </html>
