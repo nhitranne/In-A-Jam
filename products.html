@@ -672,13 +672,15 @@
 </footer>
 
 <script>
-/* ============ CART: persistence via window.storage (đồng bộ toàn site) ============ */
+/* ============ CART: persistence via localStorage (đồng bộ toàn site, hoạt động khi deploy thật) ============ */
 const CART_KEY = 'iaj-cart-items';
-async function getCart(){ try{ const r = await window.storage.get(CART_KEY); return r ? JSON.parse(r.value) : []; }catch(e){ return []; } }
-async function saveCart(items){ try{ await window.storage.set(CART_KEY, JSON.stringify(items)); }catch(e){ console.error(e); } }
+async function getCart(){ try{ const raw = localStorage.getItem(CART_KEY); return raw ? JSON.parse(raw) : []; }catch(e){ return []; } }
+async function saveCart(items){ try{ localStorage.setItem(CART_KEY, JSON.stringify(items)); }catch(e){ console.error(e); } }
 async function addToCart(item){ const items = await getCart(); items.push(item); await saveCart(items); updateBadge(items); }
 function updateBadge(items){ document.getElementById('cartBadge').textContent = items.reduce((s,i)=>s+(i.qty||1),0); }
 (async ()=>{ updateBadge(await getCart()); })();
+// Đồng bộ badge nếu giỏ hàng thay đổi ở tab/trang khác (cùng site)
+window.addEventListener('storage', (e)=>{ if(e.key === CART_KEY) getCart().then(updateBadge); });
 
 /* ============ FRUIT LINE-ART (matches the 4 flavors) ============ */
 function fruitIcon(type, color){

@@ -85,6 +85,60 @@ async function checkLoginStatus() {
 
 }
 
+/* ===========================================
+   UPDATE ACCOUNT UI
+=========================================== */
+
+async function updateAccountUI(){
+
+    const wrap = document.getElementById("accountWrap");
+
+    if(!wrap) return;
+
+    const user = await getCurrentUser();
+
+    if(!user){
+
+        wrap.innerHTML = `
+            <a class="icon-btn" title="Đăng nhập" href="login.html">
+                👤
+            </a>
+        `;
+
+        return;
+    }
+
+    const firstName =
+        user.user_metadata?.first_name ||
+        user.email.charAt(0).toUpperCase();
+
+    wrap.innerHTML = `
+        <div class="account-dropdown">
+            <button class="icon-btn" id="accountBtn">
+                ${firstName}
+            </button>
+
+            <div class="account-menu">
+
+                <a href="orders.html">
+                    📦 Đơn hàng của tôi
+                </a>
+
+                <hr>
+
+                <button id="logoutBtn">
+                    Đăng xuất
+                </button>
+
+            </div>
+        </div>
+    `;
+
+    document
+        .getElementById("logoutBtn")
+        .addEventListener("click", logout);
+
+}
 
 /* ===========================================
    START
@@ -93,6 +147,8 @@ async function checkLoginStatus() {
 document.addEventListener("DOMContentLoaded", async () => {
 
     await checkLoginStatus();
+
+    await updateAccountUI();
 
 });
 

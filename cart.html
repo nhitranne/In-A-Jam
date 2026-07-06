@@ -640,6 +640,10 @@
         </div>
       </div>
 
+      <button class="checkout-btn" id="confirmCash" style="margin-top:20px; display:none;">
+    Đặt hàng
+</button>
+
       <div class="transfer-box" id="transferBox">
         <div class="qr-row">
           <div class="qr-placeholder">🏦 QR<br>Ngân hàng<br><small>(ảnh sẽ cập nhật)</small></div>
@@ -709,19 +713,21 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
 
 <script>
-/* ============ CART: real persistence via window.storage ============ */
+/* ============ CART: persistence via localStorage (đồng bộ toàn site, hoạt động khi deploy thật) ============ */
 const CART_KEY = 'iaj-cart-items';
 
 async function getCart(){
   try{
-    const res = await window.storage.get(CART_KEY);
-    return res ? JSON.parse(res.value) : [];
+    const raw = localStorage.getItem(CART_KEY);
+    return raw ? JSON.parse(raw) : [];
   }catch(e){ return []; }
 }
 async function saveCart(items){
-  try{ await window.storage.set(CART_KEY, JSON.stringify(items)); }
+  try{ localStorage.setItem(CART_KEY, JSON.stringify(items)); }
   catch(e){ console.error('Không thể lưu giỏ hàng', e); }
 }
 async function addToCart(item){
@@ -736,22 +742,37 @@ function updateBadge(items){
   document.getElementById('cartBadge').textContent = count;
 }
 (async ()=>{ updateBadge(await getCart()); })();
-
-
+// Đồng bộ badge & danh sách nếu giỏ hàng thay đổi ở tab/trang khác (cùng site)
+window.addEventListener('storage', (e)=>{
+  if(e.key === CART_KEY){
+    getCart().then(items=>{ updateBadge(items); if(typeof renderCartStep === 'function') renderCartStep(); });
+  }
+});
 
 
 
 /* ============ ACCOUNT STATE (shared across pages) ============ */
 const USER_KEY = 'iaj-user';
 async function getUser(){
-  try{ const res = await window.storage.get(USER_KEY); return res ? JSON.parse(res.value) : null; }
-  catch(e){ return null; }
+
+  if(window.getCurrentUser){
+      return await window.getCurrentUser();
+  }
+
+  return null;
+
 }
 async function setUser(user){
-  try{ await window.storage.set(USER_KEY, JSON.stringify(user)); } catch(e){ console.error('Không thể lưu tài khoản', e); }
+  try{ localStorage.setItem(USER_KEY, JSON.stringify(user)); } catch(e){ console.error('Không thể lưu tài khoản', e); }
 }
 async function clearUser(){
-  try{ await window.storage.delete(USER_KEY); } catch(e){}
+
+    if(window.logout){
+
+        await window.logout();
+
+    }
+
 }
 function injectAccountStyles(){
   if(document.getElementById('accountDropdownStyle')) return;
@@ -775,19 +796,34 @@ async function renderAccountIcon(){
   const wrap = document.getElementById('accountWrap');
   if(!wrap) return;
   injectAccountStyles();
+  
   if(user){
     wrap.innerHTML = `
-      <div class="account-trigger" id="accountTrigger">${(user.firstName||'?').charAt(0).toUpperCase()}</div>
-      <div class="account-menu" id="accountMenu">
-        <div class="am-name">${user.firstName||''} ${user.lastName||''}</div>
-        <div class="am-email">${user.email||''}</div>
-        <hr>
-        <a href="orders.html">Đơn hàng</a>
-        <a href="index.html">Cửa hàng</a>
-        <hr>
-        <button id="logoutBtn">Đăng xuất</button>
-      </div>
-    `;
+  <div class="account-trigger" id="accountTrigger">
+    ${(user.user_metadata?.last_name || user.user_metadata?.first_name || user.email).charAt(0).toUpperCase()}
+  </div>
+
+  <div class="account-menu" id="accountMenu">
+    <div class="am-name">
+  ${user.user_metadata?.last_name || ''} ${user.user_metadata?.first_name || ''}
+</div>
+
+    <div class="am-email">
+      ${user.email}
+    </div>
+
+    <hr>
+
+    <a href="orders.html">📦 Đơn hàng của tôi</a>
+
+    <a href="index.html">🧋 Cửa hàng</a>
+
+    <hr>
+
+    <button id="logoutBtn">Đăng xuất</button>
+
+  </div>
+`;
     document.getElementById('accountTrigger').addEventListener('click', (e)=>{
       e.stopPropagation();
       document.getElementById('accountMenu').classList.toggle('show');
@@ -799,7 +835,6 @@ async function renderAccountIcon(){
     document.getElementById('logoutBtn').addEventListener('click', async (e)=>{
       e.preventDefault();
       await clearUser();
-      window.location.href = 'index.html';
     });
   } else {
     wrap.innerHTML = `<a class="icon-btn" title="Đăng nhập" href="login.html" id="accountIcon">👤</a>`;
@@ -929,15 +964,25 @@ document.getElementById('goToPayment').addEventListener('click', () => {
 
 // Payment method selection
 document.getElementById('payCash').addEventListener('click', () => {
-  document.getElementById('payCash').classList.add('selected');
-  document.getElementById('payTransfer').classList.remove('selected');
-  document.getElementById('transferBox').classList.remove('show');
-  finalizeOrder();
+
+    document.getElementById('payCash').classList.add('selected');
+    document.getElementById('payTransfer').classList.remove('selected');
+
+    document.getElementById('transferBox').classList.remove('show');
+
+    document.getElementById('confirmCash').style.display="block";
+
 });
 document.getElementById('payTransfer').addEventListener('click', () => {
-  document.getElementById('payTransfer').classList.add('selected');
-  document.getElementById('payCash').classList.remove('selected');
-  document.getElementById('transferBox').classList.add('show');
+
+    document.getElementById('payTransfer').classList.add('selected');
+
+    document.getElementById('payCash').classList.remove('selected');
+
+    document.getElementById('transferBox').classList.add('show');
+
+    document.getElementById('confirmCash').style.display="none";
+
 });
 
 document.getElementById('proofUpload').addEventListener('change', (e)=>{
@@ -956,26 +1001,94 @@ document.getElementById('proofUpload').addEventListener('change', (e)=>{
 document.getElementById('confirmTransfer').addEventListener('click', () => {
   finalizeOrder();
 });
+document.getElementById("confirmCash")
+.addEventListener("click", finalizeOrder);
 
 async function finalizeOrder(){
-  const total = checkoutItems.reduce((s,i)=>s+i.price*i.qty,0);
-  const order = {
-    id: Date.now().toString().slice(-6),
-    date: new Date().toLocaleDateString('vi-VN'),
-    items: checkoutItems,
-    total: total,
-    status: 'Chờ xác nhận'
-  };
-  try{
-    const res = await window.storage.get('iaj-orders');
-    const orders = res ? JSON.parse(res.value) : [];
-    orders.push(order);
-    await window.storage.set('iaj-orders', JSON.stringify(orders));
-  }catch(e){ console.error('Không thể lưu đơn hàng', e); }
 
-  await saveCart([]);
-  updateBadge([]);
-  showStep('stepConfirm');
+    const { data:{session} } =
+    await window.supabaseClient.auth.getSession();
+
+    if(!session){
+        alert("Vui lòng đăng nhập trước khi đặt hàng.");
+        window.location.href="login.html";
+        return;
+    }
+
+    const customerName=document.getElementById("shipName").value.trim();
+    const phone=document.getElementById("shipPhone").value.trim();
+
+    let address="";
+
+    if(document.getElementById("shipLocation").value==="ueh"){
+        address="Đại học Kinh tế TP.HCM cơ sở B";
+    }else{
+        address=document.getElementById("shipAddress").value.trim();
+    }
+
+    const paymentMethod=
+        document.getElementById("payCash").classList.contains("selected")
+        ? "Cash"
+        : "Transfer";
+
+    const total=checkoutItems.reduce(
+        (sum,item)=>sum+item.price*item.qty,
+        0
+    );
+
+    // Lưu order
+    const {data:order,error:orderError}=
+    await window.supabaseClient
+    .from("orders")
+    .insert({
+        user_id:session.user.id,
+        customer_name:customerName,
+        customer_email:session.user.email,
+        phone:phone,
+        address:address,
+        total:total,
+        payment_method:paymentMethod
+    })
+    .select()
+    .single();
+
+    if(orderError){
+        console.error(orderError);
+        alert(orderError.message);
+        return;
+    }
+
+    // Lưu order_items
+    const items=checkoutItems.map(item=>({
+
+        order_id:order.id,
+
+        product_name:item.name,
+
+        price:item.price,
+
+        quantity:item.qty,
+
+        image:"🍵"
+
+    }));
+
+    const {error:itemError}=
+    await window.supabaseClient
+    .from("order_items")
+    .insert(items);
+
+    if(itemError){
+        console.error(itemError);
+        alert(itemError.message);
+        return;
+    }
+
+    await saveCart([]);
+    updateBadge([]);
+
+    showStep("stepConfirm");
+
 }
 
 renderCartStep();
