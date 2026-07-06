@@ -457,32 +457,40 @@
   }
   .tarot-search-error.show{ display:block; }
 
-  /* ---- lá bài đơn ---- */
-  .card-result{ display:flex; justify-content:center; margin-top:36px; perspective:1400px; }
+  /* ---- lá bài đơn: hiện mặt chính trước, click để lật xem thông điệp ---- */
+  .card-result{
+    display:none; justify-content:center; align-items:center;
+    position:fixed; inset:0; z-index:300; padding:24px;
+    background:rgba(58,42,34,.55); backdrop-filter:blur(3px);
+    perspective:1600px;
+  }
+  .card-result.show{ display:flex; animation:fadeUp .35s ease forwards; }
+  .tcard-overlay-inner{ position:relative; display:flex; flex-direction:column; align-items:center; }
+  .tcard-close{
+    position:absolute; top:-16px; right:-16px; width:34px; height:34px; border-radius:50%;
+    border:none; background:var(--paper); color:var(--ink); font-size:1.1rem; cursor:pointer;
+    box-shadow:0 6px 14px rgba(58,42,34,.3); display:flex; align-items:center; justify-content:center;
+    z-index:2;
+  }
+  .tcard-close:hover{ background:var(--marmalade); color:var(--paper); }
   .tcard{
-    width:190px; height:290px; position:relative; cursor:pointer;
+    width:250px; height:390px; position:relative; cursor:pointer;
     transform-style:preserve-3d; transition:transform .7s cubic-bezier(.4,.2,.2,1);
+  }
+  @media (max-width:480px){
+    .tcard{ width:78vw; max-width:270px; height:58vh; max-height:420px; }
   }
   .tcard.flipped{ transform:rotateY(180deg); }
   .tcard .face{
-    position:absolute; inset:0; border-radius:16px;
+    position:absolute; inset:0; border-radius:18px;
     display:flex; align-items:center; justify-content:center;
     backface-visibility:hidden; text-align:center;
-    box-shadow:0 14px 30px rgba(58,42,34,.18);
+    box-shadow:0 18px 36px rgba(0,0,0,.35);
     overflow:hidden;
   }
-  .tcard .back{
-    background:
-      repeating-linear-gradient(135deg, var(--plum) 0 8px, var(--plum-soft) 8px 16px);
-    border:3px solid var(--mustard);
-  }
-  .tcard .back::after{
-    content:"✦"; color:var(--mustard); font-size:1.6rem;
-  }
   .tcard .front{
-    background:var(--paper); transform:rotateY(180deg);
-    border:2px solid var(--marmalade); flex-direction:column;
-    padding:0;
+    background:var(--paper); border:2px solid var(--marmalade);
+    flex-direction:column; padding:0;
   }
   .tcard .front img{ width:100%; height:100%; object-fit:cover; display:block; }
   .tcard .front .front-nofig{
@@ -492,30 +500,20 @@
   .tcard .front-caption{
     position:absolute; left:0; right:0; bottom:0;
     background:rgba(58,42,34,.72); color:var(--paper);
-    font-size:.72rem; font-weight:600; padding:6px 8px;
+    font-size:.82rem; font-weight:600; padding:8px 10px;
   }
-  .tcard-hint{ margin-top:14px; color:var(--ink-soft); font-size:.85rem; font-style:italic; }
-
-  .tarot-msg{
-    max-width:760px; margin:32px auto 0; background:var(--cream);
-    border:1px solid var(--line); border-radius:20px; padding:28px;
-    display:none; text-align:left;
+  .tcard .back{
+    background:var(--cream); transform:rotateY(180deg);
+    border:2px solid var(--plum); flex-direction:column;
+    align-items:stretch; justify-content:flex-start;
+    padding:22px 20px; text-align:left; overflow-y:auto;
   }
-  .tarot-msg.show{ display:block; animation:fadeUp .5s ease forwards; }
-  .tarot-msg-inner{ display:flex; gap:28px; align-items:flex-start; }
-  .tarot-msg-img{
-    flex:0 0 170px; width:170px; border-radius:12px; overflow:hidden;
-    box-shadow:0 10px 22px rgba(58,42,34,.2); border:2px solid var(--marmalade);
+  .tcard .back h4{
+    color:var(--marmalade-deep); margin-bottom:10px; font-size:1.1rem; text-align:center;
+    font-family:'Fraunces', serif;
   }
-  .tarot-msg-img img{ width:100%; display:block; }
-  .tarot-msg-text{ flex:1; min-width:0; }
-  .tarot-msg h4{ color:var(--marmalade-deep); margin-bottom:10px; font-size:1.2rem; }
-  .tarot-msg p{ color:var(--ink-soft); font-size:.95rem; white-space:pre-line; }
-  @media (max-width:640px){
-    .tarot-msg-inner{ flex-direction:column; align-items:center; }
-    .tarot-msg-img{ flex:0 0 auto; width:150px; }
-    .tarot-frame{ padding:40px 18px 32px; }
-  }
+  .tcard .back p{ color:var(--ink-soft); font-size:.85rem; white-space:pre-line; margin:0; }
+  .tcard-hint{ margin-top:16px; color:var(--paper); font-size:.85rem; font-style:italic; text-align:center; }
   .reshuffle{
     margin-top:26px; background:none; border:1px solid var(--line);
     padding:10px 22px; border-radius:999px; cursor:pointer; font-weight:500;
@@ -560,14 +558,14 @@
   <span class="sparkle" style="top:30%; right:14%;">✦</span>
   <span class="sparkle" style="top:65%; right:22%; font-size:.8rem;">✧</span>
   <h1>Thông Điệp Từ Vũ Trụ</h1>
-  <p>Hãy nghe xem vũ trụ đang muốn nhắn nhủ gì với bạn nhé</p>
+  <p>Hãy lắng nghe xem vũ trụ đang muốn nhắn nhủ gì đến bạn nhé</p>
 </section>
 
 <!-- ================= TAROT PICKER ================= -->
 <section class="tarot-picker-section">
   <div class="section-inner">
     <div class="eyebrow">Rút Bài</div>
-    <h2 class="section-title" style="margin-left:auto;margin-right:auto;">Giải mã lá bài Tarot</h2>
+    <h2 class="section-title" style="margin-left:auto;margin-right:auto;">Bạn nhận được lá bài gì từ In A Jam nhỉ?</h2>
 
     <div class="tarot-frame">
       <span class="tarot-frame-corner tl"></span>
@@ -580,21 +578,10 @@
         <datalist id="tarotNamesList"></datalist>
         <button class="tarot-search-btn" id="tarotSearchBtn">🔍 Tìm lá bài</button>
       </div>
-      <div class="tarot-search-hint">Bạn nhận được lá Tarot gì từ In A Jam nhỉ?</div>
+      <div class="tarot-search-hint">Gõ tên lá bài rồi nhấn Tìm hoặc Enter nhé.</div>
       <div class="tarot-search-error" id="tarotSearchError">Không tìm thấy lá bài này, thử tên khác xem sao 🥲</div>
 
-      <div class="card-result" id="cardResult" style="display:none;"></div>
-      <div class="tcard-hint" id="tcardHint" style="display:none;">Chạm vào lá bài để xem thông điệp nhé ✦</div>
-
-      <div class="tarot-msg" id="tarotMsg">
-        <div class="tarot-msg-inner">
-          <div class="tarot-msg-img"><img id="tarotMsgImg" src="" alt=""></div>
-          <div class="tarot-msg-text">
-            <h4 id="tarotMsgTitle"></h4>
-            <p id="tarotMsgBody"></p>
-          </div>
-        </div>
-      </div>
+      <div class="card-result" id="cardResult"></div>
     </div>
   </div>
 </section>
@@ -708,8 +695,6 @@ const searchInput = document.getElementById('tarotSearchInput');
 const searchBtn = document.getElementById('tarotSearchBtn');
 const searchError = document.getElementById('tarotSearchError');
 const cardResult = document.getElementById('cardResult');
-const tcardHint = document.getElementById('tcardHint');
-const tarotMsgEl = document.getElementById('tarotMsg');
 
 function normalize(str){
   return str.trim().toLowerCase();
@@ -723,38 +708,73 @@ function findCard(query){
       || TAROT.find(c => normalize(c.name).includes(q));
 }
 
+function closeCard(){
+  cardResult.classList.remove('show');
+  cardResult.innerHTML = '';
+}
+
 function showCard(card){
   searchError.classList.remove('show');
-  tarotMsgEl.classList.remove('show');
-
-  cardResult.style.display = 'flex';
-  tcardHint.style.display = 'block';
   cardResult.innerHTML = '';
+
+  // khối bọc ngoài: nút đóng + lá bài + gợi ý
+  const wrap = document.createElement('div');
+  wrap.className = 'tcard-overlay-inner';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'tcard-close';
+  closeBtn.type = 'button';
+  closeBtn.setAttribute('aria-label', 'Đóng');
+  closeBtn.textContent = '✕';
+  closeBtn.addEventListener('click', (e)=>{ e.stopPropagation(); closeCard(); });
 
   const el = document.createElement('div');
   el.className = 'tcard';
-  const frontInner = card.img
-    ? `<img src="${card.img}" alt="Lá bài ${card.name}"><span class="front-caption">${card.name}</span>`
-    : `<div class="front-nofig">✦<br>${card.name}<br><small>(hình đang cập nhật)</small></div>`;
-  el.innerHTML = `
-    <div class="face back"></div>
-    <div class="face front">${frontInner}</div>
-  `;
+
+  // mặt chính (hiện ngay khi mở): hình lá bài
+  const front = document.createElement('div');
+  front.className = 'face front';
+  if(card.img){
+    const img = document.createElement('img');
+    img.src = card.img;
+    img.alt = 'Lá bài ' + card.name;
+    const cap = document.createElement('span');
+    cap.className = 'front-caption';
+    cap.textContent = card.name;
+    front.appendChild(img);
+    front.appendChild(cap);
+  } else {
+    const nofig = document.createElement('div');
+    nofig.className = 'front-nofig';
+    nofig.innerHTML = '✦<br>' + card.name + '<br><small>(hình đang cập nhật)</small>';
+    front.appendChild(nofig);
+  }
+
+  // mặt sau (hiện sau khi lật): thông điệp
+  const back = document.createElement('div');
+  back.className = 'face back';
+  const title = document.createElement('h4');
+  title.textContent = card.name;
+  const body = document.createElement('p');
+  body.textContent = card.msg;
+  back.appendChild(title);
+  back.appendChild(body);
+
+  el.appendChild(front);
+  el.appendChild(back);
   el.addEventListener('click', ()=>{
-    if(el.classList.contains('flipped')) return;
-    el.classList.add('flipped');
-    setTimeout(()=>{
-      document.getElementById('tarotMsgTitle').textContent = card.name;
-      document.getElementById('tarotMsgBody').textContent = card.msg;
-      const imgEl = document.getElementById('tarotMsgImg');
-      if(card.img){ imgEl.src = card.img; imgEl.alt = 'Lá bài ' + card.name; imgEl.style.display='block'; }
-      else { imgEl.style.display='none'; }
-      tarotMsgEl.classList.add('show');
-      tarotMsgEl.scrollIntoView({behavior:'smooth', block:'nearest'});
-    }, 350);
+    el.classList.toggle('flipped');
   });
-  cardResult.appendChild(el);
-  cardResult.scrollIntoView({behavior:'smooth', block:'nearest'});
+
+  const hint = document.createElement('div');
+  hint.className = 'tcard-hint';
+  hint.textContent = 'Chạm vào lá bài để lật và xem thông điệp nhé ✦';
+
+  wrap.appendChild(closeBtn);
+  wrap.appendChild(el);
+  wrap.appendChild(hint);
+  cardResult.appendChild(wrap);
+  cardResult.classList.add('show');
 }
 
 function doSearch(){
@@ -763,15 +783,16 @@ function doSearch(){
     showCard(card);
   } else {
     searchError.classList.add('show');
-    cardResult.style.display = 'none';
-    tcardHint.style.display = 'none';
-    tarotMsgEl.classList.remove('show');
+    closeCard();
   }
 }
 
 searchBtn.addEventListener('click', doSearch);
 searchInput.addEventListener('keydown', (e)=>{
   if(e.key === 'Enter'){ e.preventDefault(); doSearch(); }
+});
+cardResult.addEventListener('click', (e)=>{
+  if(e.target === cardResult) closeCard();
 });
 </script>
 </body>
