@@ -69,9 +69,6 @@ ${profile.email}
 📦 Đơn hàng của tôi
 </a>
 
-<a href="#" onclick="alert('Tính năng Hồ sơ cá nhân sẽ sớm ra mắt!'); return false;">
-👤 Hồ sơ cá nhân
-</a>
 
 <hr>
 
@@ -180,7 +177,7 @@ display:block;
 
 width:100%;
 
-padding:8px;
+padding:12px 10px;
 
 text-align:left;
 
@@ -191,6 +188,13 @@ border:none;
 cursor:pointer;
 
 font-size:14px;
+
+}
+
+.account-menu a:hover,
+.account-menu button:hover{
+
+background:#F8EFE8;
 
 }
 
