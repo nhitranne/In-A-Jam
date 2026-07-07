@@ -86,72 +86,25 @@ async function checkLoginStatus() {
 }
 
 /* ===========================================
-   UPDATE ACCOUNT UI
+   NOTE
+   ---------------------------------------------
+   Việc render nút tài khoản (chữ cái đầu tên,
+   dropdown "Đơn hàng của tôi" / "Đăng xuất")
+   được xử lý DUY NHẤT bởi js/profile.js.
+
+   Trước đây file này có tự chạy updateAccountUI()
+   khi DOMContentLoaded, chạy song song với
+   profile.js (và với đoạn script riêng ở cart.html /
+   login.html) khiến 2-3 đoạn code cùng ghi đè lên
+   #accountWrap. Bên nào chạy xong sau cùng sẽ đè lên
+   bên kia, gây ra hiện tượng chữ hiển thị đè lên nhau
+   và nút không bấm được để mở dropdown.
+
+   => KHÔNG tự động gọi updateAccountUI/checkLoginStatus
+   ở đây nữa. Mọi trang chỉ cần include:
+     <script src="js/supabase.js"></script>
+     <script src="js/profile.js"></script>
 =========================================== */
-
-async function updateAccountUI(){
-
-    const wrap = document.getElementById("accountWrap");
-
-    if(!wrap) return;
-
-    const user = await getCurrentUser();
-
-    if(!user){
-
-        wrap.innerHTML = `
-            <a class="icon-btn" title="Đăng nhập" href="login.html">
-                👤
-            </a>
-        `;
-
-        return;
-    }
-
-    const firstName =
-        user.user_metadata?.first_name ||
-        user.email.charAt(0).toUpperCase();
-
-    wrap.innerHTML = `
-        <div class="account-dropdown">
-            <button class="icon-btn" id="accountBtn">
-                ${firstName}
-            </button>
-
-            <div class="account-menu">
-
-                <a href="orders.html">
-                    📦 Đơn hàng của tôi
-                </a>
-
-                <hr>
-
-                <button id="logoutBtn">
-                    Đăng xuất
-                </button>
-
-            </div>
-        </div>
-    `;
-
-    document
-        .getElementById("logoutBtn")
-        .addEventListener("click", logout);
-
-}
-
-/* ===========================================
-   START
-=========================================== */
-
-document.addEventListener("DOMContentLoaded", async () => {
-
-    await checkLoginStatus();
-
-    await updateAccountUI();
-
-});
-
 
 /* ===========================================
    EXPORT

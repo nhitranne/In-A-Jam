@@ -84,13 +84,29 @@ ${profile.email}
 
     document
         .getElementById("accountTrigger")
-        .onclick = () => {
+        .onclick = (e) => {
+
+        e.stopPropagation();
 
         document
             .getElementById("accountMenu")
             .classList.toggle("show");
 
     };
+
+    // Đóng dropdown khi bấm ra ngoài
+    document.addEventListener("click", (e) => {
+
+        const menu = document.getElementById("accountMenu");
+        const trigger = document.getElementById("accountTrigger");
+
+        if (!menu || !trigger) return;
+
+        if (!menu.contains(e.target) && !trigger.contains(e.target)) {
+            menu.classList.remove("show");
+        }
+
+    });
 
     document
         .getElementById("logoutBtn")
