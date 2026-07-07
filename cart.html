@@ -94,6 +94,42 @@
     .menu-toggle{display:flex;}
   }
 
+  /* ---------- AUTH REQUIRED MODAL (đăng nhập/đăng ký trước khi xem giỏ hàng) ---------- */
+  .auth-modal-overlay{
+    position:fixed; inset:0; z-index:500;
+    background:rgba(58,42,34,0.55);
+    display:none; align-items:center; justify-content:center;
+    padding:20px;
+  }
+  .auth-modal-overlay.show{ display:flex; }
+  .auth-modal{
+    background:var(--paper); border-radius:var(--radius);
+    max-width:400px; width:100%; padding:36px 30px;
+    text-align:center; box-shadow:0 20px 50px rgba(58,42,34,.3);
+    animation:fadeUp .4s ease forwards;
+  }
+  .auth-modal-icon{
+    width:60px; height:60px; border-radius:50%; margin:0 auto 18px;
+    background: radial-gradient(circle at 35% 30%, var(--mustard), var(--marmalade));
+    display:flex; align-items:center; justify-content:center; font-size:1.5rem;
+  }
+  .auth-modal h3{ margin-bottom:10px; font-size:1.3rem; }
+  .auth-modal p{ color:var(--ink-soft); font-size:.92rem; margin-bottom:24px; }
+  .auth-modal-actions{ display:flex; flex-direction:column; gap:12px; }
+  .auth-btn{
+    padding:14px 20px; border-radius:999px; font-weight:600; font-size:.95rem;
+    cursor:pointer; border:none; transition:transform .15s, background .2s;
+  }
+  .auth-btn.primary{ background:var(--ink); color:var(--paper); }
+  .auth-btn.primary:hover{ background:var(--marmalade-deep); transform:translateY(-2px); }
+  .auth-btn.secondary{ background:transparent; border:1px solid var(--line); color:var(--ink); }
+  .auth-btn.secondary:hover{ border-color:var(--marmalade); color:var(--marmalade-deep); }
+  .auth-modal-back{
+    display:inline-block; margin-top:18px; font-size:.85rem;
+    color:var(--ink-soft); text-decoration:underline;
+  }
+  body.auth-modal-open{ overflow:hidden; }
+
   /* ---------- HERO ---------- */
   @keyframes fadeUp{ from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);} }
 
@@ -568,6 +604,20 @@
   </div>
 </header>
 
+<!-- Popup yêu cầu đăng nhập/đăng ký, hiện ngay khi vào giỏ hàng nếu chưa đăng nhập -->
+<div class="auth-modal-overlay" id="authModalOverlay">
+  <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+    <div class="auth-modal-icon">🔒</div>
+    <h3 id="authModalTitle">Vui lòng đăng nhập</h3>
+    <p>Bạn cần đăng nhập hoặc đăng ký tài khoản để xem giỏ hàng và đặt hàng tại In A Jam.</p>
+    <div class="auth-modal-actions">
+      <button class="auth-btn primary" id="authLoginBtn">Đăng nhập</button>
+      <button class="auth-btn secondary" id="authSignupBtn">Đăng ký tài khoản mới</button>
+    </div>
+    <a href="index.html" class="auth-modal-back">← Quay về trang chủ</a>
+  </div>
+</div>
+
 
 <!-- ================= PAGE BANNER ================= -->
 <section class="page-banner">
@@ -575,7 +625,7 @@
   <p>Gác lại bộn bề, chỉ còn vài bước nữa thôi</p>
 </section>
 
-<section class="checkout-wrap">
+<section class="checkout-wrap" id="checkoutSection" style="display:none;">
   <div class="section-inner">
 
     <!-- STEP 1: CART -->
@@ -802,6 +852,7 @@ window.addEventListener('storage', (e)=>{
 
 /* ============ CHECKOUT WIZARD LOGIC ============ */
 let checkoutItems = [];
+let selectedProofFile = null; // File minh chứng chuyển khoản, sẽ upload lên Supabase Storage khi đặt hàng
 
 function money(n){ return n.toLocaleString('vi-VN') + '₫'; }
 
@@ -881,9 +932,12 @@ document.getElementById('shipLocation').addEventListener('change', (e)=>{
   document.getElementById('uehSubfield').style.display = e.target.value === 'ueh' ? 'block' : 'none';
   document.getElementById('otherSubfield').style.display = e.target.value === 'other' ? 'block' : 'none';
 });
-document.getElementById('uehReceiveType').addEventListener('change', (e)=>{
-  document.getElementById('roomField').style.display = e.target.value === 'class' ? 'block' : 'none';
-});
+function toggleRoomField(){
+  document.getElementById('roomField').style.display =
+    document.getElementById('uehReceiveType').value === 'class' ? 'block' : 'none';
+}
+document.getElementById('uehReceiveType').addEventListener('change', toggleRoomField);
+toggleRoomField(); // gọi ngay khi tải trang để khớp với lựa chọn mặc định "Nhận trực tiếp tại lớp"
 document.querySelectorAll('input[name="receiveTime"]').forEach(r => {
   r.addEventListener('change', (e)=>{
     document.getElementById('laterFields').style.display = e.target.value === 'later' ? 'block' : 'none';
@@ -912,6 +966,22 @@ document.getElementById('goToPayment').addEventListener('click', () => {
   if(!name || !phone){
     alert('Vui lòng nhập đầy đủ Họ và Tên, Số điện thoại.');
     return;
+  }
+  if(document.getElementById('shipLocation').value === 'other'){
+    const otherAddress = document.getElementById('shipAddress').value.trim();
+    if(!otherAddress){
+      alert('Vui lòng nhập địa chỉ nhận hàng.');
+      return;
+    }
+  }
+  const receiveTimeOption = document.querySelector('input[name="receiveTime"]:checked')?.value || 'later';
+  if(receiveTimeOption === 'later'){
+    const date = document.getElementById('shipDate').value;
+    const hasSlot = document.querySelector('.time-slot.selected');
+    if(!date || !hasSlot){
+      alert('Vui lòng chọn ngày và khung giờ nhận hàng.');
+      return;
+    }
   }
   showStep('stepPayment');
 });
@@ -942,6 +1012,7 @@ document.getElementById('payTransfer').addEventListener('click', () => {
 document.getElementById('proofUpload').addEventListener('change', (e)=>{
   const file = e.target.files[0];
   if(!file) return;
+  selectedProofFile = file; // giữ lại file gốc để upload lên Supabase Storage lúc đặt hàng
   const reader = new FileReader();
   reader.onload = () => {
     const preview = document.getElementById('uploadPreview');
@@ -973,11 +1044,30 @@ async function finalizeOrder(){
     const phone=document.getElementById("shipPhone").value.trim();
 
     let address="";
+    const deliveryType = document.getElementById("shipLocation").value; // 'ueh' | 'other'
+    let receiveType = "";
+    let room = "";
 
-    if(document.getElementById("shipLocation").value==="ueh"){
+    if(deliveryType === "ueh"){
         address="Đại học Kinh tế TP.HCM cơ sở B";
+        receiveType = document.getElementById("uehReceiveType").value; // 'class' | 'hall'
+        if(receiveType === "class"){
+            room = document.getElementById("shipRoom").value.trim();
+        }
     }else{
         address=document.getElementById("shipAddress").value.trim();
+    }
+
+    // Ngày & khung giờ nhận hàng
+    const receiveTimeOption = document.querySelector('input[name="receiveTime"]:checked')?.value || "later";
+    const deliveryDate = receiveTimeOption === "later" ? document.getElementById("shipDate").value : "";
+    const selectedSlotEl = document.querySelector('.time-slot.selected');
+    const deliveryTimeSlot = receiveTimeOption === "later" ? (selectedSlotEl ? selectedSlotEl.textContent.trim() : "") : "";
+
+    if(receiveTimeOption === "later" && (!deliveryDate || !deliveryTimeSlot)){
+        alert("Vui lòng chọn ngày và khung giờ nhận hàng.");
+        showStep("stepShipping");
+        return;
     }
 
     const paymentMethod=
@@ -985,10 +1075,40 @@ async function finalizeOrder(){
         ? "Cash"
         : "Transfer";
 
+    if(paymentMethod === "Transfer" && !selectedProofFile){
+        alert("Vui lòng tải lên minh chứng chuyển khoản trước khi đặt hàng.");
+        return;
+    }
+
     const total=checkoutItems.reduce(
         (sum,item)=>sum+item.price*item.qty,
         0
     );
+
+    // Upload minh chứng chuyển khoản lên Supabase Storage (nếu thanh toán bằng chuyển khoản)
+    let proofUrl = null;
+    if(paymentMethod === "Transfer" && selectedProofFile){
+        const fileExt = selectedProofFile.name.split('.').pop();
+        const filePath = `${session.user.id}/${Date.now()}.${fileExt}`;
+
+        const { error: uploadError } = await window.supabaseClient
+            .storage
+            .from('payment-proofs')
+            .upload(filePath, selectedProofFile, { upsert: true });
+
+        if(uploadError){
+            console.error(uploadError);
+            alert("Không thể tải lên minh chứng chuyển khoản: " + uploadError.message);
+            return;
+        }
+
+        const { data: publicUrlData } = window.supabaseClient
+            .storage
+            .from('payment-proofs')
+            .getPublicUrl(filePath);
+
+        proofUrl = publicUrlData?.publicUrl || null;
+    }
 
     // Lưu order
     const {data:order,error:orderError}=
@@ -1000,8 +1120,14 @@ async function finalizeOrder(){
         customer_email:session.user.email,
         phone:phone,
         address:address,
+        delivery_type:deliveryType,
+        receive_type:receiveType || null,
+        room:room || null,
+        delivery_date:deliveryDate || null,
+        delivery_time_slot:deliveryTimeSlot || null,
         total:total,
-        payment_method:paymentMethod
+        payment_method:paymentMethod,
+        payment_proof_url:proofUrl
     })
     .select()
     .single();
@@ -1040,12 +1166,48 @@ async function finalizeOrder(){
 
     await saveCart([]);
     updateBadge([]);
+    selectedProofFile = null;
 
     showStep("stepConfirm");
 
 }
 
-renderCartStep();
+/* ============ KHỞI TẠO TRANG GIỎ HÀNG ============
+   Bắt buộc đăng nhập ngay khi vào trang: nếu chưa đăng nhập,
+   hiện popup yêu cầu đăng nhập/đăng ký ngay lập tức (không chuyển
+   trang), giỏ hàng trong localStorage vẫn được giữ nguyên để sau
+   khi đăng nhập xong quay lại vẫn còn hàng. Chỉ khi đã đăng nhập
+   mới ẩn popup, hiện khu vực giỏ hàng/checkout và render dữ liệu.
+   ======================================================== */
+function showAuthModal(){
+  document.getElementById('authModalOverlay').classList.add('show');
+  document.body.classList.add('auth-modal-open');
+}
+document.getElementById('authLoginBtn').addEventListener('click', () => {
+  const redirectTo = encodeURIComponent(window.location.pathname + window.location.search);
+  window.location.href = `login.html?redirect=${redirectTo}`;
+});
+document.getElementById('authSignupBtn').addEventListener('click', () => {
+  const redirectTo = encodeURIComponent(window.location.pathname + window.location.search);
+  window.location.href = `login.html?mode=register&redirect=${redirectTo}`;
+});
+
+(async function initCartPage(){
+  try{
+    const { data:{ session } } = await window.supabaseClient.auth.getSession();
+    if(!session){
+      showAuthModal();
+      return;
+    }
+    document.getElementById('checkoutSection').style.display = '';
+    renderCartStep();
+  }catch(e){
+    console.error('Lỗi kiểm tra đăng nhập:', e);
+    // Nếu có lỗi khi kiểm tra session, vẫn hiện giỏ hàng để không chặn người dùng hoàn toàn
+    document.getElementById('checkoutSection').style.display = '';
+    renderCartStep();
+  }
+})();
 </script>
 </body>
 </html>
