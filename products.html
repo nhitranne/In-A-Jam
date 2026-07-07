@@ -173,8 +173,66 @@
     border:1.5px solid var(--cream);
     box-shadow:0 2px 6px rgba(169,118,46,.3);
   }
-  .menu-toggle{display:none;}
-  @media (max-width: 860px){
+  /* ---------- MOBILE HAMBURGER MENU (screens below 768px) ---------- */
+  .menu-toggle{
+    display:none;
+    flex-direction:column; justify-content:center; align-items:center; gap:5px;
+    width:38px; height:38px; border-radius:50%;
+    border:1px solid var(--line-gold); background:var(--paper);
+    cursor:pointer; flex-shrink:0;
+  }
+  .menu-toggle span{
+    display:block; width:18px; height:2px; border-radius:2px;
+    background:var(--ink-soft);
+    transition:transform .25s ease, opacity .2s ease;
+  }
+  .menu-toggle.is-open span:nth-child(1){ transform:translateY(7px) rotate(45deg); }
+  .menu-toggle.is-open span:nth-child(2){ opacity:0; }
+  .menu-toggle.is-open span:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
+
+  .mobile-menu-overlay{
+    position:fixed; inset:0; z-index:150;
+    background:rgba(75,58,38,0.35);
+    opacity:0; visibility:hidden;
+    transition:opacity .3s ease, visibility .3s ease;
+  }
+  .mobile-menu-overlay.is-open{ opacity:1; visibility:visible; }
+
+  .mobile-menu{
+    position:fixed; top:0; right:0; z-index:200;
+    width:78%; max-width:320px; height:100%;
+    background:var(--cream);
+    box-shadow:-10px 0 30px rgba(75,58,38,0.2);
+    padding:24px 24px 32px;
+    transform:translateX(100%);
+    transition:transform .35s ease;
+    overflow-y:auto;
+    display:flex; flex-direction:column;
+  }
+  .mobile-menu.is-open{ transform:translateX(0); }
+  .mobile-menu-header{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:18px;
+  }
+  .mobile-menu-title{
+    font-family:'Fraunces', serif; font-weight:600; font-size:1.05rem; color:var(--gold-deep);
+  }
+  .mobile-menu-close{
+    width:38px; height:38px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--line-gold); background:var(--paper);
+    font-size:1.1rem; color:var(--ink-soft); cursor:pointer;
+  }
+  .mobile-menu ul{ list-style:none; display:flex; flex-direction:column; }
+  .mobile-menu li{ border-bottom:1px solid var(--line-gold); }
+  .mobile-menu a{
+    display:block; padding:16px 6px; font-size:1.05rem; font-weight:500;
+    color:var(--ink-soft); min-height:44px;
+  }
+  .mobile-menu a.active, .mobile-menu a:active{ color:var(--gold-deep); }
+  body.menu-open{ overflow:hidden; }
+
+  @media (max-width: 768px){
     nav ul{display:none;}
     .menu-toggle{display:flex;}
   }
@@ -540,6 +598,9 @@
       </ul>
     </nav>
     <div class="nav-icons">
+      <button class="menu-toggle" id="menuToggle" aria-label="Mở menu" aria-expanded="false" aria-controls="mobileMenu">
+        <span></span><span></span><span></span>
+      </button>
       <div class="account-wrap" id="accountWrap">
         <a class="icon-btn" title="Đăng nhập" href="login.html">👤</a>
       </div>
@@ -550,6 +611,22 @@
     </div>
   </div>
 </header>
+
+<!-- Mobile hamburger menu: overlay + slide-in panel, only shown below 768px -->
+<div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+<nav class="mobile-menu" id="mobileMenu" aria-label="Menu di động">
+  <div class="mobile-menu-header">
+    <span class="mobile-menu-title">In A Jam</span>
+    <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Đóng menu">✕</button>
+  </div>
+  <ul>
+    <li><a href="index.html">Trang chủ</a></li>
+    <li><a href="about.html">Về In A Jam</a></li>
+    <li><a href="products.html" class="active">Sản Phẩm</a></li>
+    <li><a href="tarot.html">Tarot</a></li>
+    <li><a href="policy.html">Chính sách</a></li>
+  </ul>
+</nav>
 
 <!-- =========================================================
      Reusable inline SVG defs for decorative line-art motifs
@@ -683,6 +760,34 @@ function updateBadge(items){ document.getElementById('cartBadge').textContent = 
 (async ()=>{ updateBadge(await getCart()); })();
 // Đồng bộ badge nếu giỏ hàng thay đổi ở tab/trang khác (cùng site)
 window.addEventListener('storage', (e)=>{ if(e.key === CART_KEY) getCart().then(updateBadge); });
+
+/* ============ MOBILE HAMBURGER MENU ============ */
+const menuToggle = document.getElementById('menuToggle');
+const mobileMenu = document.getElementById('mobileMenu');
+const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+const mobileMenuClose = document.getElementById('mobileMenuClose');
+
+function openMobileMenu(){
+  mobileMenu.classList.add('is-open');
+  mobileMenuOverlay.classList.add('is-open');
+  menuToggle.classList.add('is-open');
+  menuToggle.setAttribute('aria-expanded', 'true');
+  document.body.classList.add('menu-open');
+}
+function closeMobileMenu(){
+  mobileMenu.classList.remove('is-open');
+  mobileMenuOverlay.classList.remove('is-open');
+  menuToggle.classList.remove('is-open');
+  menuToggle.setAttribute('aria-expanded', 'false');
+  document.body.classList.remove('menu-open');
+}
+menuToggle.addEventListener('click', ()=>{
+  mobileMenu.classList.contains('is-open') ? closeMobileMenu() : openMobileMenu();
+});
+mobileMenuClose.addEventListener('click', closeMobileMenu);
+mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+mobileMenu.querySelectorAll('a').forEach(link=> link.addEventListener('click', closeMobileMenu));
+document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeMobileMenu(); });
 
 /* ============ FRUIT LINE-ART (matches the 4 flavors) ============ */
 function fruitIcon(type, color){
