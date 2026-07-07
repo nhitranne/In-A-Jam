@@ -558,6 +558,10 @@
     display:flex; align-items:center; justify-content:center; flex-direction:column; gap:6px;
     color:var(--ink-soft); font-size:.78rem; text-align:center; background:var(--cream);
   }
+  .qr-image{
+    width:220px; max-width:100%; border-radius:16px; border:1px solid var(--line);
+    background:var(--cream); padding:8px;
+  }
   .transfer-note{ background:#FBF0E2; border:1px solid var(--marmalade); border-radius:12px; padding:14px 16px; font-size:.85rem; color:var(--ink); margin-bottom:18px; }
   .upload-box{
     border:2px dashed var(--line); border-radius:14px; padding:20px; text-align:center; cursor:pointer; margin-bottom:20px;
@@ -650,13 +654,12 @@
       <h2 class="section-title step-title">Thông tin giao hàng</h2>
       <div class="shipping-layout">
         <form id="shippingForm">
-          <div class="field">
-            <label>Chúng mình có thể gọi bạn là gì nhỉ?</label>
-            <input type="text" id="shipName" required placeholder="Tên hoặc biệt danh của bạn là...">
-          </div>
-          <div class="field">
-            <label>Số điện thoại</label>
-            <input type="tel" id="shipPhone" required placeholder="09xx xxx xxx">
+          <div class="field" id="accountInfoBox">
+            <label>Thông tin liên hệ</label>
+            <div id="accountInfoDisplay" style="padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--cream);font-size:.92rem;color:var(--ink);">
+              Đang tải thông tin tài khoản...
+            </div>
+            <small style="color:var(--ink-soft);">Thông tin này được lấy tự động từ tài khoản bạn đã đăng ký.</small>
           </div>
           <div class="field">
             <label>Địa chỉ nhận hàng</label>
@@ -736,10 +739,9 @@
 
       <div class="transfer-box" id="transferBox">
         <div class="qr-row">
-          <div class="qr-placeholder">🏦 QR<br>Ngân hàng<br><small>(ảnh sẽ cập nhật)</small></div>
-          <div class="qr-placeholder">💗 QR<br>Momo<br><small>(ảnh sẽ cập nhật)</small></div>
+          <img class="qr-image" src="assets/qr-transfer.png" alt="Mã QR chuyển khoản In A Jam (Ngân hàng / MoMo)">
         </div>
-        <div class="transfer-note">Lưu ý: Nội dung chuyển khoản: <strong>Họ và tên_Số điện thoại</strong></div>
+        <div class="transfer-note">Lưu ý: Nội dung chuyển khoản: <strong id="transferNoteContent">Họ và tên_Số điện thoại</strong></div>
         <label class="upload-box" id="uploadBox">
           <input type="file" id="proofUpload" accept="image/*" style="display:none;">
           <div id="uploadLabel">📎 Tải lên minh chứng chuyển khoản</div>
@@ -853,6 +855,36 @@ window.addEventListener('storage', (e)=>{
 /* ============ CHECKOUT WIZARD LOGIC ============ */
 let checkoutItems = [];
 let selectedProofFile = null; // File minh chứng chuyển khoản, sẽ upload lên Supabase Storage khi đặt hàng
+let currentProfile = null; // { full_name, phone } lấy từ bảng "profiles", dùng thay cho việc bắt nhập lại
+
+// Lấy họ tên & SĐT từ bảng "profiles" và hiển thị lên khối thông tin liên hệ ở bước giao hàng
+async function loadAccountInfo(userId){
+  const box = document.getElementById('accountInfoDisplay');
+  try{
+    const { data: profile, error } = await window.supabaseClient
+      .from('profiles')
+      .select('full_name, phone')
+      .eq('id', userId)
+      .single();
+
+    if(error || !profile){
+      console.error(error);
+      box.textContent = 'Không lấy được thông tin tài khoản. Vui lòng tải lại trang.';
+      return;
+    }
+
+    currentProfile = profile;
+    box.innerHTML = `👤 <strong>${profile.full_name || '(chưa có tên)'}</strong> &nbsp;•&nbsp; 📞 ${profile.phone || '(chưa có SĐT)'}`;
+
+    const noteEl = document.getElementById('transferNoteContent');
+    if(noteEl && profile.full_name && profile.phone){
+      noteEl.textContent = `${profile.full_name}_${profile.phone}`;
+    }
+  }catch(e){
+    console.error(e);
+    box.textContent = 'Không lấy được thông tin tài khoản. Vui lòng tải lại trang.';
+  }
+}
 
 function money(n){ return n.toLocaleString('vi-VN') + '₫'; }
 
@@ -961,10 +993,8 @@ document.querySelectorAll('input[name="receiveTime"]').forEach(r => {
 })();
 
 document.getElementById('goToPayment').addEventListener('click', () => {
-  const name = document.getElementById('shipName').value.trim();
-  const phone = document.getElementById('shipPhone').value.trim();
-  if(!name || !phone){
-    alert('Vui lòng nhập đầy đủ Họ và Tên, Số điện thoại.');
+  if(!currentProfile || !currentProfile.full_name || !currentProfile.phone){
+    alert('Không lấy được thông tin tài khoản (họ tên/SĐT). Vui lòng tải lại trang hoặc đăng nhập lại.');
     return;
   }
   if(document.getElementById('shipLocation').value === 'other'){
@@ -1092,8 +1122,12 @@ async function finalizeOrderInner(){
         return;
     }
 
-    const customerName=document.getElementById("shipName").value.trim();
-    const phone=document.getElementById("shipPhone").value.trim();
+    if(!currentProfile || !currentProfile.full_name || !currentProfile.phone){
+        alert("Không lấy được thông tin tài khoản (họ tên/SĐT). Vui lòng tải lại trang hoặc đăng nhập lại.");
+        return;
+    }
+    const customerName=currentProfile.full_name;
+    const phone=currentProfile.phone;
 
     let address="";
     const deliveryType = document.getElementById("shipLocation").value; // 'ueh' | 'other'
@@ -1252,6 +1286,7 @@ document.getElementById('authSignupBtn').addEventListener('click', () => {
       return;
     }
     document.getElementById('checkoutSection').style.display = '';
+    loadAccountInfo(session.user.id);
     renderCartStep();
   }catch(e){
     console.error('Lỗi kiểm tra đăng nhập:', e);
