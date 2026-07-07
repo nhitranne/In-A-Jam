@@ -678,6 +678,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const registerCard = document.getElementById('registerCard');
   const dashCard      = document.getElementById('dashCard');
 
+  /* ============ CHUYỂN HƯỚNG SAU KHI ĐĂNG NHẬP THÀNH CÔNG ============
+     Đọc tham số ?redirect= trên URL (được cart.html gắn sẵn khi
+     yêu cầu đăng nhập). Ngay khi có sự kiện đăng nhập thành công
+     (SIGNED_IN), tự động điều hướng người dùng tới trang đó
+     (ví dụ: giỏ hàng) thay vì ở lại trang đăng nhập.
+     ======================================================== */
+  const redirectTarget = new URLSearchParams(window.location.search).get('redirect');
+
+  if(window.supabaseClient && redirectTarget){
+    window.supabaseClient.auth.onAuthStateChange((event, session) => {
+      if(event === 'SIGNED_IN' && session){
+        window.location.href = decodeURIComponent(redirectTarget);
+      }
+    });
+  }
+
   const showRegisterLink = document.getElementById('showRegister');
   if(showRegisterLink){
     showRegisterLink.addEventListener('click', (e)=>{
@@ -708,6 +724,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if(!session){
       showCard(loginCard);
+      return;
+    }
+
+    if(redirectTarget){
+      window.location.href = decodeURIComponent(redirectTarget);
       return;
     }
 
