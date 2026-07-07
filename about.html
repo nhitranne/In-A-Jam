@@ -752,7 +752,40 @@ function updateBadge(items){
 
 
 </script>
+<script>
+/* ============ MOBILE NAV: mở/đóng menu hamburger ============ */
+const menuToggle = document.getElementById('menuToggle');
+const mobileMenu = document.getElementById('mobileMenu');
+const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
 
+function openMobileMenu(){
+  mobileMenu.classList.add('open');
+  mobileMenuOverlay.classList.add('open');
+  menuToggle.classList.add('active');
+  menuToggle.setAttribute('aria-expanded', 'true');
+  mobileMenu.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('menu-open');
+}
+
+function closeMobileMenu(){
+  mobileMenu.classList.remove('open');
+  mobileMenuOverlay.classList.remove('open');
+  menuToggle.classList.remove('active');
+  menuToggle.setAttribute('aria-expanded', 'false');
+  mobileMenu.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('menu-open');
+}
+
+menuToggle.addEventListener('click', () => {
+  mobileMenu.classList.contains('open') ? closeMobileMenu() : openMobileMenu();
+});
+
+mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+mobileMenu.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', closeMobileMenu);
+});
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 <script src="js/profile.js"></script>
