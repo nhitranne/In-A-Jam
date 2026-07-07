@@ -494,7 +494,9 @@
       </ul>
     </nav>
     <div class="nav-icons">
-      <a class="icon-btn" title="Đăng nhập" href="login.html">👤</a>
+      <div class="account-wrap" id="accountWrap">
+        <a class="icon-btn" title="Đăng nhập" href="login.html">👤</a>
+      </div>
       <a class="icon-btn" title="Giỏ hàng" href="cart.html">
         🧺
         <span class="cart-badge" id="cartBadge">0</span>
@@ -634,17 +636,17 @@
 </footer>
 
 <script>
-/* ============ CART: real persistence via window.storage ============ */
+/* ============ CART: persistence via localStorage (đồng bộ toàn site, hoạt động khi deploy thật) ============ */
 const CART_KEY = 'iaj-cart-items';
 
 async function getCart(){
   try{
-    const res = await window.storage.get(CART_KEY);
-    return res ? JSON.parse(res.value) : [];
+    const raw = localStorage.getItem(CART_KEY);
+    return raw ? JSON.parse(raw) : [];
   }catch(e){ return []; }
 }
 async function saveCart(items){
-  try{ await window.storage.set(CART_KEY, JSON.stringify(items)); }
+  try{ localStorage.setItem(CART_KEY, JSON.stringify(items)); }
   catch(e){ console.error('Không thể lưu giỏ hàng', e); }
 }
 async function addToCart(item){
@@ -663,5 +665,9 @@ function updateBadge(items){
 
 
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/profile.js"></script>
 </body>
 </html>

@@ -540,7 +540,9 @@
       </ul>
     </nav>
     <div class="nav-icons">
-      <a class="icon-btn" title="Đăng nhập" href="#login-anchor">👤</a>
+      <div class="account-wrap" id="accountWrap">
+        <a class="icon-btn" title="Đăng nhập" href="login.html">👤</a>
+      </div>
       <a class="icon-btn" title="Giỏ hàng" href="cart.html">
         🧺
         <span class="cart-badge" id="cartBadge">0</span>
@@ -969,5 +971,9 @@ function selectProduct(id){
   setTimeout(()=> panel.scrollIntoView({behavior:'smooth', block:'nearest'}), 150);
 }
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/profile.js"></script>
 </body>
 </html>

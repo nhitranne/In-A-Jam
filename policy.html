@@ -367,7 +367,9 @@
       </ul>
     </nav>
     <div class="nav-icons">
-      <a class="icon-btn" title="Đăng nhập" href="#login-anchor">👤</a>
+      <div class="account-wrap" id="accountWrap">
+        <a class="icon-btn" title="Đăng nhập" href="login.html">👤</a>
+      </div>
       <a class="icon-btn" title="Giỏ hàng" href="#cart-anchor">
         🧺
         <span class="cart-badge" id="cartBadge">0</span>
@@ -613,9 +615,9 @@
 </footer>
 
 <script>
-/* ============ CART BADGE: đồng bộ toàn site qua window.storage ============ */
+/* ============ CART BADGE: đồng bộ toàn site qua localStorage ============ */
 const CART_KEY = 'iaj-cart-items';
-async function getCart(){ try{ const r = await window.storage.get(CART_KEY); return r ? JSON.parse(r.value) : []; }catch(e){ return []; } }
+async function getCart(){ try{ const raw = localStorage.getItem(CART_KEY); return raw ? JSON.parse(raw) : []; }catch(e){ return []; } }
 function updateBadge(items){ document.getElementById('cartBadge').textContent = items.reduce((s,i)=>s+(i.qty||1),0); }
 (async ()=>{ updateBadge(await getCart()); })();
 
@@ -637,5 +639,9 @@ document.querySelectorAll('.quick-chip').forEach(chip=>{
   });
 });
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/profile.js"></script>
 </body>
 </html>
