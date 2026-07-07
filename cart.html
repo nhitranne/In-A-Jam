@@ -1012,6 +1012,21 @@ document.getElementById('payTransfer').addEventListener('click', () => {
 document.getElementById('proofUpload').addEventListener('change', (e)=>{
   const file = e.target.files[0];
   if(!file) return;
+
+  // Giới hạn định dạng & dung lượng ảnh minh chứng trước khi upload
+  const allowedTypes = ['image/png','image/jpeg','image/jpg','image/webp'];
+  const maxSizeMB = 5;
+  if(!allowedTypes.includes(file.type)){
+    alert("Chỉ chấp nhận ảnh định dạng PNG, JPG hoặc WEBP.");
+    e.target.value = "";
+    return;
+  }
+  if(file.size > maxSizeMB * 1024 * 1024){
+    alert(`Ảnh minh chứng không được vượt quá ${maxSizeMB}MB.`);
+    e.target.value = "";
+    return;
+  }
+
   selectedProofFile = file; // giữ lại file gốc để upload lên Supabase Storage lúc đặt hàng
   const reader = new FileReader();
   reader.onload = () => {
@@ -1029,12 +1044,49 @@ document.getElementById('confirmTransfer').addEventListener('click', () => {
 document.getElementById("confirmCash")
 .addEventListener("click", finalizeOrder);
 
+let isSubmittingOrder = false; // chống bấm đặt hàng nhiều lần liên tiếp
+
+// Chuyển thông báo lỗi kỹ thuật của Supabase thành câu tiếng Việt dễ hiểu
+function friendlySupabaseError(error, context){
+    const msg = (error && error.message) ? error.message.toLowerCase() : "";
+
+    if(msg.includes("row-level security") || msg.includes("row level security")){
+        if(context === "upload"){
+            return "Không thể tải lên minh chứng chuyển khoản do thiếu quyền truy cập (RLS). Vui lòng đăng nhập lại hoặc liên hệ quản trị viên để kiểm tra cấu hình Supabase Storage.";
+        }
+        return "Không thể lưu đơn hàng do thiếu quyền truy cập (RLS). Vui lòng đăng nhập lại hoặc liên hệ quản trị viên để kiểm tra chính sách bảo mật của bảng dữ liệu.";
+    }
+    if(msg.includes("jwt") || msg.includes("session")){
+        return "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại rồi thử đặt hàng lại.";
+    }
+    if(msg.includes("bucket not found")){
+        return "Không tìm thấy nơi lưu trữ ảnh minh chứng. Vui lòng liên hệ quản trị viên.";
+    }
+    return (error && error.message) ? error.message : "Đã có lỗi xảy ra, vui lòng thử lại.";
+}
+
 async function finalizeOrder(){
 
-    const { data:{session} } =
+    if(isSubmittingOrder) return; // tránh double-submit khi người dùng bấm nhiều lần
+    isSubmittingOrder = true;
+
+    const confirmBtns = [document.getElementById('confirmTransfer'), document.getElementById('confirmCash')];
+    confirmBtns.forEach(btn => { if(btn) btn.disabled = true; });
+
+    try{
+        await finalizeOrderInner();
+    } finally {
+        isSubmittingOrder = false;
+        confirmBtns.forEach(btn => { if(btn) btn.disabled = false; });
+    }
+}
+
+async function finalizeOrderInner(){
+
+    const { data:{session}, error: sessionError } =
     await window.supabaseClient.auth.getSession();
 
-    if(!session){
+    if(sessionError || !session){
         alert("Vui lòng đăng nhập trước khi đặt hàng.");
         window.location.href="login.html";
         return;
@@ -1098,7 +1150,7 @@ async function finalizeOrder(){
 
         if(uploadError){
             console.error(uploadError);
-            alert("Không thể tải lên minh chứng chuyển khoản: " + uploadError.message);
+            alert(friendlySupabaseError(uploadError, "upload"));
             return;
         }
 
@@ -1134,7 +1186,7 @@ async function finalizeOrder(){
 
     if(orderError){
         console.error(orderError);
-        alert(orderError.message);
+        alert(friendlySupabaseError(orderError, "order"));
         return;
     }
 
@@ -1160,7 +1212,7 @@ async function finalizeOrder(){
 
     if(itemError){
         console.error(itemError);
-        alert(itemError.message);
+        alert(friendlySupabaseError(itemError, "order_items"));
         return;
     }
 
