@@ -88,8 +88,40 @@
     min-width:18px; height:18px; border-radius:50%;
     display:flex; align-items:center; justify-content:center; padding:0 3px;
   }
-  .menu-toggle{display:none;}
-  @media (max-width: 860px){
+  /* ---------- MOBILE NAV (hamburger) ---------- */
+  /* dùng chung diện mạo với .icon-btn (login/giỏ hàng) cho đồng bộ */
+  .menu-toggle{
+    display:none; flex-direction:column; gap:5px; padding:0;
+    flex-shrink:0; -webkit-tap-highlight-color:transparent;
+  }
+  .menu-toggle span{
+    display:block; width:16px; height:2px; border-radius:2px;
+    background:var(--ink); transition:transform .3s ease, opacity .3s ease;
+  }
+  .menu-toggle.active span:nth-child(1){ transform:translateY(7px) rotate(45deg); }
+  .menu-toggle.active span:nth-child(2){ opacity:0; }
+  .menu-toggle.active span:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
+
+  .mobile-nav{
+    max-height:0; overflow:hidden; background:var(--paper);
+    border-bottom:1px solid var(--line);
+    transition:max-height .35s ease;
+  }
+  .mobile-nav.open{ max-height:420px; }
+  .mobile-nav ul{
+    list-style:none; display:flex; flex-direction:column;
+    padding:6px 24px 18px; max-width:1200px; margin:0 auto;
+  }
+  .mobile-nav ul li{ border-bottom:1px solid var(--line); }
+  .mobile-nav ul li:last-child{ border-bottom:none; }
+  .mobile-nav ul li a{
+    display:flex; align-items:center; min-height:48px;
+    font-size:1rem; font-weight:500; color:var(--ink-soft);
+    transition:color .2s;
+  }
+  .mobile-nav ul li a:hover, .mobile-nav ul li a:active{ color:var(--marmalade-deep); }
+
+  @media (max-width: 768px){
     nav ul{display:none;}
     .menu-toggle{display:flex;}
   }
@@ -540,6 +572,9 @@
       </ul>
     </nav>
     <div class="nav-icons">
+      <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Mở menu" aria-expanded="false" aria-controls="mobileNav">
+        <span></span><span></span><span></span>
+      </button>
       <div class="account-wrap" id="accountWrap">
         <a class="icon-btn" title="Đăng nhập" href="login.html">👤</a>
       </div>
@@ -548,6 +583,15 @@
         <span class="cart-badge" id="cartBadge">0</span>
       </a>
     </div>
+  </div>
+  <div class="mobile-nav" id="mobileNav">
+    <ul>
+      <li><a href="index.html">Trang chủ</a></li>
+      <li><a href="about.html">Về In A Jam</a></li>
+      <li><a href="products.html">Sản Phẩm</a></li>
+      <li><a href="tarot.html">Tarot</a></li>
+      <li><a href="policy.html">Chính sách</a></li>
+    </ul>
   </div>
 </header>
 
@@ -631,6 +675,39 @@
 
 
 <script>
+/* ============ MOBILE NAV: hamburger toggle ============ */
+(function(){
+  const toggle = document.getElementById('menuToggle');
+  const mobileNav = document.getElementById('mobileNav');
+  if(!toggle || !mobileNav) return;
+
+  function closeMenu(){
+    mobileNav.classList.remove('open');
+    toggle.classList.remove('active');
+    toggle.setAttribute('aria-expanded', 'false');
+  }
+  function openMenu(){
+    mobileNav.classList.add('open');
+    toggle.classList.add('active');
+    toggle.setAttribute('aria-expanded', 'true');
+  }
+
+  toggle.addEventListener('click', function(){
+    if(mobileNav.classList.contains('open')) closeMenu();
+    else openMenu();
+  });
+
+  // Đóng menu khi chọn 1 link
+  mobileNav.querySelectorAll('a').forEach(function(link){
+    link.addEventListener('click', closeMenu);
+  });
+
+  // Đóng menu nếu resize lên desktop
+  window.addEventListener('resize', function(){
+    if(window.innerWidth > 768) closeMenu();
+  });
+})();
+
 /* ============ CART: persistence via localStorage (đồng bộ toàn site, hoạt động khi deploy thật) ============ */
 const CART_KEY = 'iaj-cart-items';
 
