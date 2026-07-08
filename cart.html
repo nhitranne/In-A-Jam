@@ -485,6 +485,25 @@
   .checkout-btn:hover{ background:var(--marmalade-deep); transform:translateY(-2px); }
   .checkout-btn:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
 
+  .promo-box{ margin:16px 0 6px; }
+  .promo-box label{ display:block; font-size:.8rem; font-weight:600; color:var(--ink); margin-bottom:8px; }
+  .promo-input-row{ display:flex; gap:8px; }
+  .promo-input-row input{
+    flex:1; padding:11px 14px; border:1px solid var(--line); border-radius:12px;
+    background:var(--paper); font-family:'Be Vietnam Pro',sans-serif; font-size:.9rem; color:var(--ink);
+    text-transform:uppercase;
+  }
+  .promo-input-row input:focus{ outline:none; border-color:var(--marmalade); }
+  .promo-apply-btn{
+    padding:11px 18px; border-radius:12px; border:none; background:var(--ink); color:var(--paper);
+    font-weight:600; font-size:.85rem; cursor:pointer; white-space:nowrap; transition:background .2s, transform .15s;
+  }
+  .promo-apply-btn:hover{ background:var(--marmalade-deep); transform:translateY(-1px); }
+  .promo-msg{ font-size:.8rem; margin-top:8px; min-height:16px; }
+  .promo-msg.success{ color:var(--sage); }
+  .promo-msg.error{ color:#A0392E; }
+  .summary-row.discount-row{ color:var(--sage); font-weight:600; }
+
   /* Steps shared */
   .step-section{ display:none; }
   .step-section.active{ display:block; }
@@ -648,6 +667,17 @@
         <div class="summary-card">
           <div class="summary-row"><span>Tạm tính</span><span id="sumSubtotal">0₫</span></div>
           <div class="summary-row"><span>Phí vận chuyển</span><span>Tính ở bước sau</span></div>
+          <div class="summary-row discount-row" id="sumDiscountRow" style="display:none;"><span>Ưu đãi preorder</span><span id="sumDiscount">-0₫</span></div>
+
+          <div class="promo-box">
+            <label for="promoInput">Mã giảm giá (đơn preorder)</label>
+            <div class="promo-input-row">
+              <input type="text" id="promoInput" placeholder="Nhập mã giảm giá">
+              <button type="button" class="promo-apply-btn" id="applyPromoBtn">Áp dụng</button>
+            </div>
+            <div class="promo-msg" id="promoMsg"></div>
+          </div>
+
           <div class="summary-total"><span>Tổng tiền</span><span id="sumTotal">0₫</span></div>
           <button class="checkout-btn" id="goToShipping">Thanh toán</button>
         </div>
@@ -704,7 +734,8 @@
           <div class="sub-field" id="laterFields" style="display:block;">
             <div class="field">
               <label>Ngày nhận</label>
-              <input type="date" id="shipDate">
+              <input type="date" id="shipDate" value="2026-07-10" disabled style="background:var(--cream); cursor:not-allowed; color:var(--ink);">
+              <small style="color:var(--ink-soft);">Hiện tại Jam chỉ tạm nhận đơn giao ngày 10/7 nhé.</small>
             </div>
             <div class="field">
               <label>Khung giờ</label>
@@ -716,6 +747,7 @@
         <div class="order-review">
           <h4>Đơn hàng</h4>
           <div id="reviewItems"></div>
+          <div class="order-total discount-row" id="reviewDiscountRow" style="display:none; font-size:.88rem; margin-top:6px;">Ưu đãi preorder: <span id="reviewDiscount">-0₫</span></div>
           <div class="order-total" style="margin-top:14px;">Tổng tiền: <span id="reviewTotal">0₫</span></div>
           <button class="checkout-btn" id="goToPayment">Thanh toán</button>
         </div>
@@ -863,6 +895,51 @@ let checkoutItems = [];
 let selectedProofFile = null; // File minh chứng chuyển khoản, sẽ upload lên Supabase Storage khi đặt hàng
 let currentProfile = null; // { full_name, phone } lấy từ bảng "profiles", dùng thay cho việc bắt nhập lại
 
+/* ============ MÃ GIẢM GIÁ (PREORDER) ============
+   Nhập đúng mã sẽ giảm 4.000₫ trên tổng đơn hàng.
+   ======================================================== */
+const PROMO_CODE = "INAJAM"; // mã giảm giá cho đơn preorder
+const PROMO_DISCOUNT = 4000; // số tiền giảm (VNĐ)
+let promoApplied = false;
+
+function getCartSubtotal(){
+  return checkoutItems.reduce((s,i)=>s+i.price*i.qty, 0);
+}
+function getDiscountAmount(){
+  if(!promoApplied) return 0;
+  return Math.min(PROMO_DISCOUNT, getCartSubtotal());
+}
+function getCartFinalTotal(){
+  return Math.max(0, getCartSubtotal() - getDiscountAmount());
+}
+
+function applyPromoCode(){
+  const input = document.getElementById('promoInput');
+  const msg = document.getElementById('promoMsg');
+  const code = input.value.trim().toUpperCase();
+
+  if(!code){
+    msg.textContent = "Vui lòng nhập mã giảm giá.";
+    msg.className = "promo-msg error";
+    return;
+  }
+  if(code === PROMO_CODE){
+    promoApplied = true;
+    msg.textContent = "Áp dụng mã thành công! Bạn được giảm 4.000₫.";
+    msg.className = "promo-msg success";
+  }else{
+    promoApplied = false;
+    msg.textContent = "Mã giảm giá không hợp lệ.";
+    msg.className = "promo-msg error";
+  }
+  renderCartStep();
+}
+
+document.getElementById('applyPromoBtn').addEventListener('click', applyPromoCode);
+document.getElementById('promoInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){ e.preventDefault(); applyPromoCode(); }
+});
+
 // Lấy họ tên & SĐT từ bảng "profiles" và hiển thị lên khối thông tin liên hệ ở bước giao hàng
 async function loadAccountInfo(userId){
   const box = document.getElementById('accountInfoDisplay');
@@ -925,7 +1002,16 @@ async function renderCartStep(){
   }
   const total = items.reduce((s,i)=>s+i.price*i.qty,0);
   document.getElementById('sumSubtotal').textContent = money(total);
-  document.getElementById('sumTotal').textContent = money(total);
+
+  const discountRow = document.getElementById('sumDiscountRow');
+  const discount = getDiscountAmount();
+  if(discount > 0){
+    discountRow.style.display = 'flex';
+    document.getElementById('sumDiscount').textContent = '-' + money(discount);
+  }else{
+    discountRow.style.display = 'none';
+  }
+  document.getElementById('sumTotal').textContent = money(getCartFinalTotal());
 
   wrap.querySelectorAll('.cart-item-row').forEach(row => {
     const id = row.dataset.id;
@@ -977,8 +1063,16 @@ function renderShippingReview(){
     </div>
   `;
   }).join('');
-  const total = checkoutItems.reduce((s,i)=>s+i.price*i.qty,0);
-  document.getElementById('reviewTotal').textContent = money(total);
+
+  const reviewDiscountRow = document.getElementById('reviewDiscountRow');
+  const discount = getDiscountAmount();
+  if(discount > 0){
+    reviewDiscountRow.style.display = 'block';
+    document.getElementById('reviewDiscount').textContent = '-' + money(discount);
+  }else{
+    reviewDiscountRow.style.display = 'none';
+  }
+  document.getElementById('reviewTotal').textContent = money(getCartFinalTotal());
 }
 
 // Location conditional fields
@@ -1188,10 +1282,7 @@ async function finalizeOrderInner(){
         return;
     }
 
-    const total=checkoutItems.reduce(
-        (sum,item)=>sum+item.price*item.qty,
-        0
-    );
+    const total=getCartFinalTotal();
 
     // Upload minh chứng chuyển khoản lên Supabase Storage (nếu thanh toán bằng chuyển khoản)
     let proofUrl = null;
@@ -1281,6 +1372,11 @@ async function finalizeOrderInner(){
     await saveCart([]);
     updateBadge([]);
     selectedProofFile = null;
+    promoApplied = false;
+    const promoInputEl = document.getElementById('promoInput');
+    const promoMsgEl = document.getElementById('promoMsg');
+    if(promoInputEl) promoInputEl.value = '';
+    if(promoMsgEl){ promoMsgEl.textContent = ''; promoMsgEl.className = 'promo-msg'; }
 
     showStep("stepConfirm");
 
