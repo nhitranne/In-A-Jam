@@ -514,6 +514,42 @@
   /* Shipping form */
   .shipping-layout{ display:grid; grid-template-columns:1.3fr 1fr; gap:40px; align-items:start; }
   @media (max-width:860px){ .shipping-layout{ grid-template-columns:1fr; } }
+  .shipping-right{ display:flex; flex-direction:column; gap:22px; }
+
+  /* Thông báo phí ship khi chọn địa chỉ ngoài cơ sở B */
+  .shipping-fee-notice{
+    margin-top:16px; display:flex; gap:14px; align-items:flex-start;
+    background:linear-gradient(135deg, #FDF0DC, #FBE0BE);
+    border:1.5px solid var(--marmalade);
+    border-left:5px solid var(--marmalade-deep);
+    border-radius:16px; padding:18px 20px;
+    box-shadow:0 8px 20px rgba(169,95,40,.15);
+    animation:fadeUp .4s ease;
+  }
+  .shipping-fee-notice .notice-icon{
+    font-size:1.5rem; line-height:1; flex-shrink:0;
+    width:38px; height:38px; border-radius:50%;
+    background:var(--paper); display:flex; align-items:center; justify-content:center;
+    box-shadow:0 3px 8px rgba(169,95,40,.2);
+  }
+  .shipping-fee-notice .notice-content{ flex:1; }
+  .shipping-fee-notice .notice-title{
+    display:block; font-weight:700; color:var(--marmalade-deep);
+    font-size:.92rem; margin-bottom:10px; line-height:1.5;
+  }
+  .shipping-fee-notice ul{ list-style:none; margin:0 0 12px; padding:0; }
+  .shipping-fee-notice ul li{
+    position:relative; padding-left:20px; font-size:.87rem; color:var(--ink);
+    margin-bottom:8px; line-height:1.5;
+  }
+  .shipping-fee-notice ul li::before{
+    content:"•"; position:absolute; left:2px; color:var(--marmalade-deep); font-weight:700;
+  }
+  .shipping-fee-notice ul li b{ color:var(--marmalade-deep); }
+  .shipping-fee-notice .notice-footer{
+    font-size:.84rem; color:var(--ink-soft); font-style:italic; margin:0;
+    border-top:1px dashed rgba(58,42,34,0.18); padding-top:10px;
+  }
 
   .field{ margin-bottom:22px; }
   .field label{
@@ -722,34 +758,50 @@
               <label>Địa chỉ</label>
               <input type="text" id="shipAddress" placeholder="E.g. 279 Nguyễn Tri Phương, phường Diên Hồng, TP. HCM" style="font-style:italic;">
             </div>
-          </div>
-
-          <div class="field">
-            <label>Thời gian nhận hàng</label>
-            <div class="radio-row">
-              <label style="display:none;"><input type="radio" name="receiveTime" value="now"> Nhận ngay</label>
-              <label><input type="radio" name="receiveTime" value="later" checked> Giao sau</label>
-            </div>
-          </div>
-          <div class="sub-field" id="laterFields" style="display:block;">
-            <div class="field">
-              <label>Ngày nhận</label>
-              <input type="date" id="shipDate" value="2026-07-10" disabled style="background:var(--cream); cursor:not-allowed; color:var(--ink);">
-              <small style="color:var(--ink-soft);">Hiện tại Jam chỉ tạm nhận đơn giao ngày 10/7 nhé.</small>
-            </div>
-            <div class="field">
-              <label>Khung giờ</label>
-              <div class="time-slot-grid" id="timeSlotGrid"></div>
+            <div class="shipping-fee-notice" id="shipFeeNotice">
+              <div class="notice-icon">🚚</div>
+              <div class="notice-content">
+                <span class="notice-title">Do vị trí bạn chọn xa cơ sở B - UEH, nên Jam xin thông báo phí ship như sau:</span>
+                <ul>
+                  <li>Từ 0 - 2km quanh cơ sở B: <b>miễn phí ship</b>.</li>
+                  <li>Từ 2 - 5km quanh cơ sở B: Jam thu <b>10.000đ</b> tiền ship/ đơn.</li>
+                </ul>
+                <p class="notice-footer">Bạn nhớ check mail để nhận thông báo về đơn và phí ship từ Jam nhé!</p>
+              </div>
             </div>
           </div>
         </form>
 
-        <div class="order-review">
-          <h4>Đơn hàng</h4>
-          <div id="reviewItems"></div>
-          <div class="order-total discount-row" id="reviewDiscountRow" style="display:none; font-size:.88rem; margin-top:6px;">Ưu đãi preorder: <span id="reviewDiscount">-0₫</span></div>
-          <div class="order-total" style="margin-top:14px;">Tổng tiền: <span id="reviewTotal">0₫</span></div>
-          <button class="checkout-btn" id="goToPayment">Thanh toán</button>
+        <div class="shipping-right">
+          <div class="order-review" id="timeCard">
+            <h4>Thời gian giao hàng</h4>
+            <div class="field" style="margin-bottom:16px;">
+              <label>Thời gian nhận hàng</label>
+              <div class="radio-row">
+                <label style="display:none;"><input type="radio" name="receiveTime" value="now"> Nhận ngay</label>
+                <label><input type="radio" name="receiveTime" value="later" checked> Giao sau</label>
+              </div>
+            </div>
+            <div class="sub-field" id="laterFields" style="display:block; margin-bottom:0;">
+              <div class="field">
+                <label>Ngày nhận</label>
+                <input type="date" id="shipDate" value="2026-07-10" disabled style="background:var(--cream); cursor:not-allowed; color:var(--ink);">
+                <small style="color:var(--ink-soft);">Hiện tại Jam chỉ tạm nhận đơn giao ngày 10/7 nhé.</small>
+              </div>
+              <div class="field">
+                <label>Khung giờ</label>
+                <div class="time-slot-grid" id="timeSlotGrid"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="order-review">
+            <h4>Đơn hàng</h4>
+            <div id="reviewItems"></div>
+            <div class="order-total discount-row" id="reviewDiscountRow" style="display:none; font-size:.88rem; margin-top:6px;">Ưu đãi preorder: <span id="reviewDiscount">-0₫</span></div>
+            <div class="order-total" style="margin-top:14px;">Tổng tiền: <span id="reviewTotal">0₫</span></div>
+            <button class="checkout-btn" id="goToPayment">Thanh toán</button>
+          </div>
         </div>
       </div>
     </div>
