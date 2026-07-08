@@ -652,6 +652,33 @@
   .confirm-box .icon{ font-size:3rem; margin-bottom:18px; }
   .confirm-box h3{ margin-bottom:14px; }
   .confirm-box p{ color:var(--ink-soft); font-size:.92rem; margin-bottom:8px; }
+
+  /* Ô thông báo đặt hàng thành công */
+  .order-success-banner{
+    max-width:520px; margin:0 auto 24px; text-align:center;
+    background: linear-gradient(160deg, #F3D9A4, var(--mustard) 120%);
+    border:2px solid var(--marmalade-deep);
+    border-radius:var(--radius);
+    padding:28px 30px;
+    box-shadow:0 14px 30px rgba(169,95,40,.25);
+    animation:fadeUp .5s ease forwards;
+  }
+  .order-success-banner .success-check{
+    width:56px; height:56px; border-radius:50%;
+    background:var(--ink); color:var(--paper);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.6rem; margin:0 auto 14px;
+  }
+  .order-success-banner .success-title{
+    font-family:'Fraunces', serif; font-weight:700; font-size:1.3rem;
+    color:var(--marmalade-deep); margin-bottom:8px;
+  }
+  .order-success-banner .success-line{
+    color:var(--ink); font-size:1rem; font-weight:500; margin-bottom:4px;
+  }
+  .order-success-banner .success-thanks{
+    color:var(--ink-soft); font-size:.95rem; font-style:italic;
+  }
 </style>
 </head>
 <body>
@@ -889,6 +916,12 @@
 
     <!-- STEP 4: CONFIRMATION -->
     <div class="step-section" id="stepConfirm">
+      <div class="order-success-banner">
+        <div class="success-check">✓</div>
+        <div class="success-title">Xác nhận</div>
+        <div class="success-line">Bạn đã đặt hàng thành công.</div>
+        <div class="success-thanks">Cảm ơn bạn đã ủng hộ In A Jam!</div>
+      </div>
       <div class="confirm-box">
         <div class="icon">🍯</div>
         <h3>Bạn đã đặt hàng thành công!</h3>
