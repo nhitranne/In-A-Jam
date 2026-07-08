@@ -512,9 +512,20 @@
   .back-link:hover{ color:var(--marmalade-deep); }
 
   /* Shipping form */
-  .shipping-layout{ display:grid; grid-template-columns:1.3fr 1fr; gap:40px; align-items:start; }
+  .shipping-layout{ display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start; }
   @media (max-width:860px){ .shipping-layout{ grid-template-columns:1fr; } }
   .shipping-right{ display:flex; flex-direction:column; gap:22px; }
+  .order-review-full{ grid-column:1 / -1; }
+  .order-review-horizontal{ display:flex; align-items:flex-start; gap:36px; }
+  .order-review-horizontal #reviewItems{ flex:1; }
+  .order-review-horizontal .order-review-side{
+    flex:0 0 260px; display:flex; flex-direction:column;
+    border-left:1px dashed var(--line); padding-left:28px;
+  }
+  @media (max-width:640px){
+    .order-review-horizontal{ flex-direction:column; gap:16px; }
+    .order-review-horizontal .order-review-side{ flex:1 1 auto; border-left:none; padding-left:0; border-top:1px dashed var(--line); padding-top:16px; }
+  }
 
   /* Thông báo phí ship khi chọn địa chỉ ngoài cơ sở B */
   .shipping-fee-notice{
@@ -772,32 +783,32 @@
           </div>
         </form>
 
-        <div class="shipping-right">
-          <div class="order-review" id="timeCard">
-            <h4>Thời gian giao hàng</h4>
-            <div class="field" style="margin-bottom:16px;">
-              <label>Thời gian nhận hàng</label>
-              <div class="radio-row">
-                <label style="display:none;"><input type="radio" name="receiveTime" value="now"> Nhận ngay</label>
-                <label><input type="radio" name="receiveTime" value="later" checked> Giao sau</label>
-              </div>
-            </div>
-            <div class="sub-field" id="laterFields" style="display:block; margin-bottom:0;">
-              <div class="field">
-                <label>Ngày nhận</label>
-                <input type="date" id="shipDate" value="2026-07-10" disabled style="background:var(--cream); cursor:not-allowed; color:var(--ink);">
-                <small style="color:var(--ink-soft);">Hiện tại Jam chỉ tạm nhận đơn giao ngày 10/7 nhé.</small>
-              </div>
-              <div class="field">
-                <label>Khung giờ</label>
-                <div class="time-slot-grid" id="timeSlotGrid"></div>
-              </div>
+        <div class="order-review" id="timeCard">
+          <h4>Thời gian giao hàng</h4>
+          <div class="field" style="margin-bottom:16px;">
+            <label>Thời gian nhận hàng</label>
+            <div class="radio-row">
+              <label style="display:none;"><input type="radio" name="receiveTime" value="now"> Nhận ngay</label>
+              <label><input type="radio" name="receiveTime" value="later" checked> Giao sau</label>
             </div>
           </div>
+          <div class="sub-field" id="laterFields" style="display:block; margin-bottom:0;">
+            <div class="field">
+              <label>Ngày nhận</label>
+              <input type="date" id="shipDate" value="2026-07-10" disabled style="background:var(--cream); cursor:not-allowed; color:var(--ink);">
+              <small style="color:var(--ink-soft);">Hiện tại Jam chỉ tạm nhận đơn giao ngày 10/7 nhé.</small>
+            </div>
+            <div class="field">
+              <label>Khung giờ</label>
+              <div class="time-slot-grid" id="timeSlotGrid"></div>
+            </div>
+          </div>
+        </div>
 
-          <div class="order-review">
-            <h4>Đơn hàng</h4>
-            <div id="reviewItems"></div>
+        <div class="order-review order-review-full order-review-horizontal">
+          <div id="reviewItems"></div>
+          <div class="order-review-side">
+            <h4 style="font-size:1.3rem;">Đơn hàng</h4>
             <div class="order-total discount-row" id="reviewDiscountRow" style="display:none; font-size:.88rem; margin-top:6px;">Ưu đãi preorder: <span id="reviewDiscount">-0₫</span></div>
             <div class="order-total" style="margin-top:14px;">Tổng tiền: <span id="reviewTotal">0₫</span></div>
             <button class="checkout-btn" id="goToPayment">Thanh toán</button>
@@ -1109,10 +1120,10 @@ function renderShippingReview(){
       (i.mix && i.mix !== 'Không thêm') ? `Mix: ${i.mix}` : ''
     ].filter(Boolean).join(' • ');
     return `
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;font-size:.88rem;color:var(--ink-soft);padding:4px 0;gap:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;font-size:1rem;color:var(--ink-soft);padding:6px 0;gap:12px;">
       <span>
         ${i.name} × ${i.qty}
-        ${opts ? `<br><span style="font-size:.78rem;">${opts}</span>` : ''}
+        ${opts ? `<br><span style="font-size:.86rem;">${opts}</span>` : ''}
       </span>
       <span style="white-space:nowrap;">${money(i.price*i.qty)}</span>
     </div>
