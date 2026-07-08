@@ -670,7 +670,7 @@
           <div class="summary-row discount-row" id="sumDiscountRow" style="display:none;"><span>Ưu đãi preorder</span><span id="sumDiscount">-0₫</span></div>
 
           <div class="promo-box">
-            <label for="promoInput">Mã giảm giá (đơn preorder)</label>
+            <label for="promoInput">Mã giảm giá</label>
             <div class="promo-input-row">
               <input type="text" id="promoInput" placeholder="Nhập mã giảm giá">
               <button type="button" class="promo-apply-btn" id="applyPromoBtn">Áp dụng</button>
@@ -895,19 +895,22 @@ let checkoutItems = [];
 let selectedProofFile = null; // File minh chứng chuyển khoản, sẽ upload lên Supabase Storage khi đặt hàng
 let currentProfile = null; // { full_name, phone } lấy từ bảng "profiles", dùng thay cho việc bắt nhập lại
 
-/* ============ MÃ GIẢM GIÁ (PREORDER) ============
-   Nhập đúng mã sẽ giảm 4.000₫ trên tổng đơn hàng.
+/* ============ MÃ GIẢM GIÁ ============
+   Nhập đúng mã sẽ giảm 4.000₫ trên mỗi ly nước trong đơn hàng.
    ======================================================== */
-const PROMO_CODE = "INAJAM"; // mã giảm giá cho đơn preorder
-const PROMO_DISCOUNT = 4000; // số tiền giảm (VNĐ)
+const PROMO_CODE = "INAJAM"; // mã giảm giá
+const PROMO_DISCOUNT_PER_ITEM = 4000; // số tiền giảm mỗi ly (VNĐ)
 let promoApplied = false;
 
 function getCartSubtotal(){
   return checkoutItems.reduce((s,i)=>s+i.price*i.qty, 0);
 }
+function getCartTotalQty(){
+  return checkoutItems.reduce((s,i)=>s+i.qty, 0);
+}
 function getDiscountAmount(){
   if(!promoApplied) return 0;
-  return Math.min(PROMO_DISCOUNT, getCartSubtotal());
+  return Math.min(PROMO_DISCOUNT_PER_ITEM * getCartTotalQty(), getCartSubtotal());
 }
 function getCartFinalTotal(){
   return Math.max(0, getCartSubtotal() - getDiscountAmount());
@@ -925,7 +928,7 @@ function applyPromoCode(){
   }
   if(code === PROMO_CODE){
     promoApplied = true;
-    msg.textContent = "Áp dụng mã thành công! Bạn được giảm 4.000₫.";
+    msg.textContent = "Áp dụng mã thành công! Bạn được giảm 4.000₫/ly nước.";
     msg.className = "promo-msg success";
   }else{
     promoApplied = false;
