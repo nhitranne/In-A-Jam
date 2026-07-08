@@ -808,7 +808,7 @@
         <div class="order-review order-review-full order-review-horizontal">
           <div id="reviewItems"></div>
           <div class="order-review-side">
-            <h4>Đơn hàng</h4>
+            <h4 style="font-size:1.3rem;">Đơn hàng</h4>
             <div class="order-total discount-row" id="reviewDiscountRow" style="display:none; font-size:.88rem; margin-top:6px;">Ưu đãi preorder: <span id="reviewDiscount">-0₫</span></div>
             <div class="order-total" style="margin-top:14px;">Tổng tiền: <span id="reviewTotal">0₫</span></div>
             <button class="checkout-btn" id="goToPayment">Thanh toán</button>
@@ -1120,10 +1120,10 @@ function renderShippingReview(){
       (i.mix && i.mix !== 'Không thêm') ? `Mix: ${i.mix}` : ''
     ].filter(Boolean).join(' • ');
     return `
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;font-size:.88rem;color:var(--ink-soft);padding:4px 0;gap:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;font-size:1rem;color:var(--ink-soft);padding:6px 0;gap:12px;">
       <span>
         ${i.name} × ${i.qty}
-        ${opts ? `<br><span style="font-size:.78rem;">${opts}</span>` : ''}
+        ${opts ? `<br><span style="font-size:.86rem;">${opts}</span>` : ''}
       </span>
       <span style="white-space:nowrap;">${money(i.price*i.qty)}</span>
     </div>
