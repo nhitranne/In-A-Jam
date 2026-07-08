@@ -512,9 +512,8 @@
   .back-link:hover{ color:var(--marmalade-deep); }
 
   /* Shipping form */
-  .shipping-layout{ display:grid; grid-template-columns:repeat(3, 1fr); gap:28px; align-items:start; }
-  @media (max-width:1100px){ .shipping-layout{ grid-template-columns:1fr 1fr; } .shipping-layout form{ grid-column:1 / -1; } }
-  @media (max-width:860px){ .shipping-layout{ grid-template-columns:1fr; } .shipping-layout form{ grid-column:auto; } }
+  .shipping-layout{ display:grid; grid-template-columns:1.3fr 1fr; gap:40px; align-items:start; }
+  @media (max-width:860px){ .shipping-layout{ grid-template-columns:1fr; } }
   .shipping-right{ display:flex; flex-direction:column; gap:22px; }
 
   /* Thông báo phí ship khi chọn địa chỉ ngoài cơ sở B */
@@ -773,34 +772,36 @@
           </div>
         </form>
 
-        <div class="order-review" id="timeCard">
-          <h4>Thời gian giao hàng</h4>
-          <div class="field" style="margin-bottom:16px;">
-            <label>Thời gian nhận hàng</label>
-            <div class="radio-row">
-              <label style="display:none;"><input type="radio" name="receiveTime" value="now"> Nhận ngay</label>
-              <label><input type="radio" name="receiveTime" value="later" checked> Giao sau</label>
+        <div class="shipping-right">
+          <div class="order-review" id="timeCard">
+            <h4>Thời gian giao hàng</h4>
+            <div class="field" style="margin-bottom:16px;">
+              <label>Thời gian nhận hàng</label>
+              <div class="radio-row">
+                <label style="display:none;"><input type="radio" name="receiveTime" value="now"> Nhận ngay</label>
+                <label><input type="radio" name="receiveTime" value="later" checked> Giao sau</label>
+              </div>
+            </div>
+            <div class="sub-field" id="laterFields" style="display:block; margin-bottom:0;">
+              <div class="field">
+                <label>Ngày nhận</label>
+                <input type="date" id="shipDate" value="2026-07-10" disabled style="background:var(--cream); cursor:not-allowed; color:var(--ink);">
+                <small style="color:var(--ink-soft);">Hiện tại Jam chỉ tạm nhận đơn giao ngày 10/7 nhé.</small>
+              </div>
+              <div class="field">
+                <label>Khung giờ</label>
+                <div class="time-slot-grid" id="timeSlotGrid"></div>
+              </div>
             </div>
           </div>
-          <div class="sub-field" id="laterFields" style="display:block; margin-bottom:0;">
-            <div class="field">
-              <label>Ngày nhận</label>
-              <input type="date" id="shipDate" value="2026-07-10" disabled style="background:var(--cream); cursor:not-allowed; color:var(--ink);">
-              <small style="color:var(--ink-soft);">Hiện tại Jam chỉ tạm nhận đơn giao ngày 10/7 nhé.</small>
-            </div>
-            <div class="field">
-              <label>Khung giờ</label>
-              <div class="time-slot-grid" id="timeSlotGrid"></div>
-            </div>
-          </div>
-        </div>
 
-        <div class="order-review">
-          <h4>Đơn hàng</h4>
-          <div id="reviewItems"></div>
-          <div class="order-total discount-row" id="reviewDiscountRow" style="display:none; font-size:.88rem; margin-top:6px;">Ưu đãi preorder: <span id="reviewDiscount">-0₫</span></div>
-          <div class="order-total" style="margin-top:14px;">Tổng tiền: <span id="reviewTotal">0₫</span></div>
-          <button class="checkout-btn" id="goToPayment">Thanh toán</button>
+          <div class="order-review">
+            <h4>Đơn hàng</h4>
+            <div id="reviewItems"></div>
+            <div class="order-total discount-row" id="reviewDiscountRow" style="display:none; font-size:.88rem; margin-top:6px;">Ưu đãi preorder: <span id="reviewDiscount">-0₫</span></div>
+            <div class="order-total" style="margin-top:14px;">Tổng tiền: <span id="reviewTotal">0₫</span></div>
+            <button class="checkout-btn" id="goToPayment">Thanh toán</button>
+          </div>
         </div>
       </div>
     </div>
