@@ -675,7 +675,7 @@ async function ensureProfileExists(session){
   try{
     const { data: existing, error: selectError } = await window.supabaseClient
       .from('profiles')
-      .select('id')
+      .select('id, full_name, phone')
       .eq('id', session.user.id)
       .maybeSingle();
 
@@ -683,20 +683,37 @@ async function ensureProfileExists(session){
       console.error('Không kiểm tra được hồ sơ tài khoản (profiles):', selectError);
       return;
     }
-    if(existing) return; // đã có profile rồi, không cần tạo lại
 
     const meta = session.user.user_metadata || {};
-    const { error: insertError } = await window.supabaseClient
-      .from('profiles')
-      .insert({
-        id: session.user.id,
-        full_name: meta.full_name || '',
-        phone: meta.phone || '',
-        email: session.user.email
-      });
 
-    if(insertError){
-      console.error('Không thể tự tạo bù hồ sơ tài khoản (profiles):', insertError);
+    if(!existing){
+      // Chưa có dòng nào cho user này -> tạo mới đầy đủ.
+      const { error: insertError } = await window.supabaseClient
+        .from('profiles')
+        .insert({
+          id: session.user.id,
+          full_name: meta.full_name || '',
+          phone: meta.phone || '',
+          email: session.user.email
+        });
+      if(insertError) console.error('Không thể tự tạo bù hồ sơ tài khoản (profiles):', insertError);
+      return;
+    }
+
+    // Đã có dòng rồi (thường do 1 trigger phía database tự tạo sẵn dòng
+    // "profiles" chỉ với id/email ngay khi tài khoản được tạo), nhưng
+    // đang thiếu họ tên/SĐT -> bổ sung lại từ user_metadata đã lưu lúc
+    // đăng ký, không đụng tới các trường khác đã có sẵn.
+    const needsUpdate = (!existing.full_name && meta.full_name) || (!existing.phone && meta.phone);
+    if(needsUpdate){
+      const { error: updateError } = await window.supabaseClient
+        .from('profiles')
+        .update({
+          full_name: existing.full_name || meta.full_name || '',
+          phone: existing.phone || meta.phone || ''
+        })
+        .eq('id', session.user.id);
+      if(updateError) console.error('Không thể cập nhật bổ sung hồ sơ tài khoản (profiles):', updateError);
     }
   }catch(e){
     console.error('Lỗi khi kiểm tra/tạo hồ sơ tài khoản:', e);
@@ -770,12 +787,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const session = data.session; // null nếu project đang bật xác nhận email
 
       if(user){
-        // Cố gắng tạo profile ngay lúc đăng ký. Nếu chưa có session
-        // (đang chờ xác nhận email) bước này có thể bị RLS chặn;
-        // ensureProfileExists() sẽ tạo bù ở lần đăng nhập đầu tiên.
+        // Dùng upsert (ghi đè nếu trùng id) thay vì insert thường: nếu có
+        // trigger phía database đã tự tạo sẵn 1 dòng profiles trống ngay
+        // lúc tài khoản được tạo, upsert vẫn điền được họ tên/SĐT vào,
+        // thay vì bị lỗi trùng khóa chính và bỏ qua âm thầm.
         const { error: insertError } = await window.supabaseClient
           .from('profiles')
-          .insert({ id: user.id, full_name: fullName, phone: phone, email: email });
+          .upsert({ id: user.id, full_name: fullName, phone: phone, email: email }, { onConflict: 'id' });
 
         if(insertError){
           console.error('Không tạo được hồ sơ tài khoản ngay lúc đăng ký, sẽ tự tạo bù khi đăng nhập lần đầu:', insertError);
