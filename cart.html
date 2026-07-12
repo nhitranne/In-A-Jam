@@ -795,7 +795,12 @@
           <div class="sub-field" id="laterFields" style="display:block; margin-bottom:0;">
             <div class="field">
               <label>Ngày nhận</label>
-              <input type="date" id="shipDate" min="2026-07-14" max="2026-07-17" value="2026-07-14">
+              <select id="shipDate">
+                <option value="2026-07-14">Thứ Ba, 14/7/2026</option>
+                <option value="2026-07-15">Thứ Tư, 15/7/2026</option>
+                <option value="2026-07-16">Thứ Năm, 16/7/2026</option>
+                <option value="2026-07-17">Thứ Sáu, 17/7/2026</option>
+              </select>
               <small style="color:var(--ink-soft);">Hiện tại Jam chỉ tạm nhận đơn giao từ 14/7 đến 17/7 nhé.</small>
             </div>
             <div class="field">
@@ -961,7 +966,7 @@ let currentProfile = null; // { full_name, phone } lấy từ bảng "profiles",
 /* ============ MÃ GIẢM GIÁ ============
    Nhập đúng mã sẽ giảm 4.000₫ trên mỗi ly nước trong đơn hàng.
    ======================================================== */
-const PROMO_CODE = "INAJAM"; // mã giảm giá
+const PROMO_CODE = "DUCDUY"; // mã giảm giá
 const PROMO_DISCOUNT_PER_ITEM = 4000; // số tiền giảm mỗi ly (VNĐ)
 let promoApplied = false;
 
