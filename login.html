@@ -663,6 +663,145 @@ function updateBadge(items){
    ghi đè lên #accountWrap.
    ======================================== */
 
+/* ============ ĐẢM BẢO LUÔN CÓ HỒ SƠ (profiles) CHO USER ĐÃ ĐĂNG NHẬP ============
+   Nếu vì lý do gì đó (mất mạng lúc đăng ký, dự án bật xác nhận email,
+   RLS chặn insert lúc chưa có session...) mà bảng "profiles" chưa có
+   dòng tương ứng với user, hàm này sẽ tự tạo bù ngay khi phát hiện
+   user đã đăng nhập thành công, dùng full_name/phone đã lưu sẵn trong
+   user_metadata lúc đăng ký (signUp options.data) làm dữ liệu gốc.
+   ======================================================== */
+async function ensureProfileExists(session){
+  if(!session || !window.supabaseClient) return;
+  try{
+    const { data: existing, error: selectError } = await window.supabaseClient
+      .from('profiles')
+      .select('id')
+      .eq('id', session.user.id)
+      .maybeSingle();
+
+    if(selectError){
+      console.error('Không kiểm tra được hồ sơ tài khoản (profiles):', selectError);
+      return;
+    }
+    if(existing) return; // đã có profile rồi, không cần tạo lại
+
+    const meta = session.user.user_metadata || {};
+    const { error: insertError } = await window.supabaseClient
+      .from('profiles')
+      .insert({
+        id: session.user.id,
+        full_name: meta.full_name || '',
+        phone: meta.phone || '',
+        email: session.user.email
+      });
+
+    if(insertError){
+      console.error('Không thể tự tạo bù hồ sơ tài khoản (profiles):', insertError);
+    }
+  }catch(e){
+    console.error('Lỗi khi kiểm tra/tạo hồ sơ tài khoản:', e);
+  }
+}
+
+/* ============ XỬ LÝ ĐĂNG KÝ TÀI KHOẢN ============
+   Tạo tài khoản qua Supabase Auth, lưu họ tên + SĐT vào user_metadata
+   (để ensureProfileExists dùng lại nếu cần) rồi tạo ngay dòng tương
+   ứng trong bảng "profiles".
+   ======================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+  const registerForm  = document.getElementById('registerForm');
+  const registerError = document.getElementById('registerError');
+  if(!registerForm) return;
+
+  registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if(registerError) registerError.classList.remove('show');
+
+    const lastName  = document.getElementById('regLastName').value.trim();
+    const firstName = document.getElementById('regFirstName').value.trim();
+    const email     = document.getElementById('regEmail').value.trim();
+    const phone     = document.getElementById('regPhone').value.trim();
+    const password  = document.getElementById('regPassword').value;
+    const confirm   = document.getElementById('regConfirm').value;
+    const fullName  = `${lastName} ${firstName}`.trim();
+
+    if(password !== confirm){
+      if(registerError){
+        registerError.textContent = 'Mật khẩu xác nhận không khớp, bạn kiểm tra lại nhé.';
+        registerError.classList.add('show');
+      }
+      return;
+    }
+    if(password.length < 6){
+      if(registerError){
+        registerError.textContent = 'Mật khẩu cần tối thiểu 6 ký tự.';
+        registerError.classList.add('show');
+      }
+      return;
+    }
+
+    const submitBtn = registerForm.querySelector('.auth-submit');
+    if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Đang tạo tài khoản...'; }
+
+    try{
+      const { data, error } = await window.supabaseClient.auth.signUp({
+        email,
+        password,
+        options: {
+          // Lưu vào user_metadata: dùng làm nguồn dữ liệu gốc để
+          // ensureProfileExists tạo bù profile nếu bước insert bên dưới
+          // không thực hiện được ngay (ví dụ project bật xác nhận email
+          // nên lúc này chưa có session).
+          data: { full_name: fullName, phone: phone }
+        }
+      });
+
+      if(error){
+        if(registerError){
+          registerError.textContent = error.message === 'User already registered'
+            ? 'Email này đã được đăng ký, bạn thử đăng nhập nhé.'
+            : (error.message || 'Đăng ký thất bại, bạn thử lại nhé.');
+          registerError.classList.add('show');
+        }
+        return;
+      }
+
+      const user    = data.user;
+      const session = data.session; // null nếu project đang bật xác nhận email
+
+      if(user){
+        // Cố gắng tạo profile ngay lúc đăng ký. Nếu chưa có session
+        // (đang chờ xác nhận email) bước này có thể bị RLS chặn;
+        // ensureProfileExists() sẽ tạo bù ở lần đăng nhập đầu tiên.
+        const { error: insertError } = await window.supabaseClient
+          .from('profiles')
+          .insert({ id: user.id, full_name: fullName, phone: phone, email: email });
+
+        if(insertError){
+          console.error('Không tạo được hồ sơ tài khoản ngay lúc đăng ký, sẽ tự tạo bù khi đăng nhập lần đầu:', insertError);
+        }
+      }
+
+      registerForm.reset();
+
+      if(!session){
+        alert('Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản trước khi đăng nhập nhé.');
+      }
+
+      document.dispatchEvent(new CustomEvent('iaj:registerSuccess'));
+
+    }catch(e){
+      console.error(e);
+      if(registerError){
+        registerError.textContent = 'Có lỗi xảy ra, bạn thử lại sau nhé.';
+        registerError.classList.add('show');
+      }
+    }finally{
+      if(submitBtn){ submitBtn.disabled = false; submitBtn.textContent = 'Đăng ký'; }
+    }
+  });
+});
+
 /* ============ CHUYỂN ĐỔI ĐĂNG NHẬP / ĐĂNG KÝ / DASHBOARD ============ */
 function showCard(card){
   ['loginCard','registerCard','dashCard'].forEach(id=>{
@@ -687,8 +826,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const redirectTarget = new URLSearchParams(window.location.search).get('redirect');
 
   if(window.supabaseClient && redirectTarget){
-    window.supabaseClient.auth.onAuthStateChange((event, session) => {
+    window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
       if(event === 'SIGNED_IN' && session){
+        await ensureProfileExists(session);
         window.location.href = decodeURIComponent(redirectTarget);
       }
     });
@@ -726,6 +866,8 @@ document.addEventListener('DOMContentLoaded', () => {
       showCard(loginCard);
       return;
     }
+
+    await ensureProfileExists(session);
 
     if(redirectTarget){
       window.location.href = decodeURIComponent(redirectTarget);
