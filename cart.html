@@ -1477,22 +1477,42 @@ document.getElementById('authSignupBtn').addEventListener('click', () => {
   window.location.href = `login.html?mode=register&redirect=${redirectTo}`;
 });
 
+let accountInfoLoadedFor = null; // tránh gọi loadAccountInfo lặp lại nhiều lần cho cùng 1 user
+
 (async function initCartPage(){
   try{
     const { data:{ session } } = await window.supabaseClient.auth.getSession();
     if(!session){
       showAuthModal();
-      return;
+    }else{
+      document.getElementById('checkoutSection').style.display = '';
+      accountInfoLoadedFor = session.user.id;
+      loadAccountInfo(session.user.id);
+      renderCartStep();
     }
-    document.getElementById('checkoutSection').style.display = '';
-    loadAccountInfo(session.user.id);
-    renderCartStep();
   }catch(e){
     console.error('Lỗi kiểm tra đăng nhập:', e);
     // Nếu có lỗi khi kiểm tra session, vẫn hiện giỏ hàng để không chặn người dùng hoàn toàn
     document.getElementById('checkoutSection').style.display = '';
     renderCartStep();
   }
+
+  // Lắng nghe thay đổi trạng thái đăng nhập: xử lý trường hợp lúc trang vừa load
+  // Supabase chưa kịp khôi phục phiên (ví dụ vừa redirect từ trang login qua),
+  // hoặc người dùng đăng nhập/đăng xuất ở tab khác => tự cập nhật lại không cần tải lại trang.
+  window.supabaseClient.auth.onAuthStateChange((event, session) => {
+    if(session && accountInfoLoadedFor !== session.user.id){
+      accountInfoLoadedFor = session.user.id;
+      document.getElementById('authModalOverlay').classList.remove('show');
+      document.body.classList.remove('auth-modal-open');
+      document.getElementById('checkoutSection').style.display = '';
+      loadAccountInfo(session.user.id);
+      renderCartStep();
+    }else if(!session && accountInfoLoadedFor !== null){
+      accountInfoLoadedFor = null;
+      showAuthModal();
+    }
+  });
 })();
 </script>
 </body>
