@@ -1295,6 +1295,9 @@ async function finalizeOrder(){
 
     try{
         await finalizeOrderInner();
+    } catch(err){
+        console.error('Lỗi không xác định khi đặt hàng:', err);
+        alert('Đã có lỗi xảy ra khi đặt hàng. Vui lòng thử lại hoặc liên hệ Jam để được hỗ trợ.');
     } finally {
         isSubmittingOrder = false;
         confirmBtns.forEach(btn => { if(btn) btn.disabled = false; });
