@@ -825,7 +825,6 @@
     <div class="step-section" id="stepPayment">
       <span class="back-link" id="backToShipping">← Quay lại thông tin giao hàng</span>
       <h2 class="section-title step-title">Chọn phương thức thanh toán</h2>
-      <div id="orderErrorBanner" style="display:none; background:#FDECEC; border:1.5px solid #C0392B; color:#8B2E22; border-radius:14px; padding:14px 18px; margin-bottom:20px; font-size:.9rem; line-height:1.6;"></div>
       <div class="payment-boxes">
         <div class="payment-box" id="payCash">
           <div class="icon">💵</div>
@@ -1181,13 +1180,13 @@ document.querySelectorAll('input[name="receiveTime"]').forEach(r => {
 
 document.getElementById('goToPayment').addEventListener('click', () => {
   if(!currentProfile || !currentProfile.full_name || !currentProfile.phone){
-    showOrderError('Không lấy được thông tin tài khoản (họ tên/SĐT). Vui lòng tải lại trang hoặc đăng nhập lại.');
+    alert('Không lấy được thông tin tài khoản (họ tên/SĐT). Vui lòng tải lại trang hoặc đăng nhập lại.');
     return;
   }
   if(document.getElementById('shipLocation').value === 'other'){
     const otherAddress = document.getElementById('shipAddress').value.trim();
     if(!otherAddress){
-      showOrderError('Vui lòng nhập địa chỉ nhận hàng.');
+      alert('Vui lòng nhập địa chỉ nhận hàng.');
       return;
     }
   }
@@ -1196,11 +1195,11 @@ document.getElementById('goToPayment').addEventListener('click', () => {
     const date = document.getElementById('shipDate').value;
     const hasSlot = document.querySelector('.time-slot.selected');
     if(!date || !hasSlot){
-      showOrderError('Vui lòng chọn ngày và khung giờ nhận hàng.');
+      alert('Vui lòng chọn ngày và khung giờ nhận hàng.');
       return;
     }
     if(date < '2026-07-22' || date > '2026-07-24'){
-      showOrderError('Hiện tại Jam chỉ tạm nhận đơn giao từ 22/7 đến 24/7/2026 nhé.');
+      alert('Hiện tại Jam chỉ tạm nhận đơn giao từ 22/7 đến 24/7/2026 nhé.');
       return;
     }
   }
@@ -1238,12 +1237,12 @@ document.getElementById('proofUpload').addEventListener('change', (e)=>{
   const allowedTypes = ['image/png','image/jpeg','image/jpg','image/webp'];
   const maxSizeMB = 5;
   if(!allowedTypes.includes(file.type)){
-    showOrderError("Chỉ chấp nhận ảnh định dạng PNG, JPG hoặc WEBP.");
+    alert("Chỉ chấp nhận ảnh định dạng PNG, JPG hoặc WEBP.");
     e.target.value = "";
     return;
   }
   if(file.size > maxSizeMB * 1024 * 1024){
-    showOrderError(`Ảnh minh chứng không được vượt quá ${maxSizeMB}MB.`);
+    alert(`Ảnh minh chứng không được vượt quá ${maxSizeMB}MB.`);
     e.target.value = "";
     return;
   }
@@ -1268,34 +1267,6 @@ document.getElementById("confirmCash")
 let isSubmittingOrder = false; // chống bấm đặt hàng nhiều lần liên tiếp
 
 // Chuyển thông báo lỗi kỹ thuật của Supabase thành câu tiếng Việt dễ hiểu
-function showOrderError(msg){
-    let toast = document.getElementById('orderErrorToast');
-    if(!toast){
-        toast = document.createElement('div');
-        toast.id = 'orderErrorToast';
-        toast.style.cssText = `
-            position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
-            max-width:90%; width:420px; z-index:9999;
-            background:#FDECEC; border:1.5px solid #C0392B; color:#8B2E22;
-            border-radius:14px; padding:16px 20px; font-size:.9rem; line-height:1.6;
-            box-shadow:0 12px 30px rgba(0,0,0,.25); display:flex; gap:10px; align-items:flex-start;
-        `;
-        document.body.appendChild(toast);
-    }
-    toast.innerHTML = `<span style="flex:1;">⚠️ ${msg}</span><span style="cursor:pointer; font-weight:700;" onclick="this.parentElement.remove()">✕</span>`;
-    toast.style.display = 'flex';
-    // cũng in ra khung banner tĩnh trong bước thanh toán (nếu đang ở đó) và console để dễ debug
-    const banner = document.getElementById('orderErrorBanner');
-    if(banner){ banner.textContent = '⚠️ ' + msg; banner.style.display = 'block'; }
-    console.error('[Order error]', msg);
-}
-function clearOrderError(){
-    const toast = document.getElementById('orderErrorToast');
-    if(toast) toast.remove();
-    const banner = document.getElementById('orderErrorBanner');
-    if(banner){ banner.style.display = 'none'; banner.textContent = ''; }
-}
-
 function friendlySupabaseError(error, context){
     const msg = (error && error.message) ? error.message.toLowerCase() : "";
 
@@ -1324,9 +1295,6 @@ async function finalizeOrder(){
 
     try{
         await finalizeOrderInner();
-    } catch(err){
-        console.error('Lỗi không xác định khi đặt hàng:', err);
-        showOrderError('Đã có lỗi xảy ra khi đặt hàng. Vui lòng thử lại hoặc liên hệ Jam để được hỗ trợ.');
     } finally {
         isSubmittingOrder = false;
         confirmBtns.forEach(btn => { if(btn) btn.disabled = false; });
@@ -1335,19 +1303,17 @@ async function finalizeOrder(){
 
 async function finalizeOrderInner(){
 
-    clearOrderError();
-
     const { data:{session}, error: sessionError } =
     await window.supabaseClient.auth.getSession();
 
     if(sessionError || !session){
-        showOrderError("Vui lòng đăng nhập trước khi đặt hàng.");
+        alert("Vui lòng đăng nhập trước khi đặt hàng.");
         window.location.href="login.html";
         return;
     }
 
     if(!currentProfile || !currentProfile.full_name || !currentProfile.phone){
-        showOrderError("Không lấy được thông tin tài khoản (họ tên/SĐT). Vui lòng tải lại trang hoặc đăng nhập lại.");
+        alert("Không lấy được thông tin tài khoản (họ tên/SĐT). Vui lòng tải lại trang hoặc đăng nhập lại.");
         return;
     }
     const customerName=currentProfile.full_name;
@@ -1375,7 +1341,7 @@ async function finalizeOrderInner(){
     const deliveryTimeSlot = receiveTimeOption === "later" ? (selectedSlotEl ? selectedSlotEl.textContent.trim() : "") : "";
 
     if(receiveTimeOption === "later" && (!deliveryDate || !deliveryTimeSlot)){
-        showOrderError("Vui lòng chọn ngày và khung giờ nhận hàng.");
+        alert("Vui lòng chọn ngày và khung giờ nhận hàng.");
         showStep("stepShipping");
         return;
     }
@@ -1386,7 +1352,7 @@ async function finalizeOrderInner(){
         : "Transfer";
 
     if(paymentMethod === "Transfer" && !selectedProofFile){
-        showOrderError("Vui lòng tải lên minh chứng chuyển khoản trước khi đặt hàng.");
+        alert("Vui lòng tải lên minh chứng chuyển khoản trước khi đặt hàng.");
         return;
     }
 
@@ -1405,7 +1371,7 @@ async function finalizeOrderInner(){
 
         if(uploadError){
             console.error(uploadError);
-            showOrderError(friendlySupabaseError(uploadError, "upload"));
+            alert(friendlySupabaseError(uploadError, "upload"));
             return;
         }
 
@@ -1441,7 +1407,7 @@ async function finalizeOrderInner(){
 
     if(orderError){
         console.error(orderError);
-        showOrderError(friendlySupabaseError(orderError, "order"));
+        alert(friendlySupabaseError(orderError, "order"));
         return;
     }
 
@@ -1473,7 +1439,7 @@ async function finalizeOrderInner(){
 
     if(itemError){
         console.error(itemError);
-        showOrderError(friendlySupabaseError(itemError, "order_items"));
+        alert(friendlySupabaseError(itemError, "order_items"));
         return;
     }
 
