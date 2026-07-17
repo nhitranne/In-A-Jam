@@ -796,12 +796,11 @@
             <div class="field">
               <label>Ngày nhận</label>
               <select id="shipDate">
-                <option value="2026-07-14">Thứ Ba, 14/7/2026</option>
-                <option value="2026-07-15">Thứ Tư, 15/7/2026</option>
-                <option value="2026-07-16">Thứ Năm, 16/7/2026</option>
-                <option value="2026-07-17">Thứ Sáu, 17/7/2026</option>
+                <option value="2026-07-22">Thứ Tư, 22/7/2026</option>
+                <option value="2026-07-23">Thứ Năm, 23/7/2026</option>
+                <option value="2026-07-24">Thứ Sáu, 24/7/2026</option>
               </select>
-              <small style="color:var(--ink-soft);">Hiện tại Jam chỉ tạm nhận đơn giao từ 14/7 đến 17/7 nhé.</small>
+              <small style="color:var(--ink-soft);">Hiện tại Jam chỉ tạm nhận đơn giao từ 22/7 đến 24/7 nhé.</small>
             </div>
             <div class="field">
               <label>Khung giờ</label>
@@ -861,9 +860,9 @@
     <div class="step-section" id="stepConfirm">
       <div class="confirm-box">
         <div class="icon">🍯</div>
-        <h3>Chúng mình đã nhận được đơn hàng của bạn!</h3>
-        <p>Bạn ơi, đừng quên kiểm tra điện thoại để Jam xác nhận "Đã nhận đơn" và nhận được cuộc gọi khi nước được giao tới nhé.</p>
-        <a href="orders.html" class="cta-btn" style="margin-top:14px;">Xem đơn hàng của tôi</a>
+        <h3>Jam đã nhận đơn hàng của bạn!</h3>
+        <p>Vui lòng để ý email để nhận đơn xác nhận, rồi theo dõi đơn hàng ở nút bên dưới nhé.</p>
+        <a href="orders.html" class="cta-btn" style="margin-top:14px;">Theo dõi đơn hàng</a>
       </div>
     </div>
 
@@ -1199,8 +1198,8 @@ document.getElementById('goToPayment').addEventListener('click', () => {
       alert('Vui lòng chọn ngày và khung giờ nhận hàng.');
       return;
     }
-    if(date < '2026-07-14' || date > '2026-07-17'){
-      alert('Hiện tại Jam chỉ tạm nhận đơn giao từ 14/7 đến 17/7/2026 nhé.');
+    if(date < '2026-07-22' || date > '2026-07-24'){
+      alert('Hiện tại Jam chỉ tạm nhận đơn giao từ 22/7 đến 24/7/2026 nhé.');
       return;
     }
   }
