@@ -481,7 +481,7 @@
     overflow:hidden;
   }
   .tea-card .card-photo img{
-    width:100%; height:100%; object-fit:cover; display:block;
+    width:100%; height:100%; object-fit:contain; display:block;
     transition:transform .5s cubic-bezier(.22,1,.36,1);
   }
   .tarot-card.tea-card:hover .card-photo img, .tarot-card.tea-card.active .card-photo img{
@@ -494,6 +494,8 @@
   }
   .tea-card .card-name{ margin-bottom:6px; }
   .tea-card .card-mood{ margin-top:auto; padding-top:14px; border-top:1px dashed var(--line-gold); line-height:1.5; width:100%; }
+
+
 
   /* ---- soda cards: tall photo frame instead of the round tea photo ---- */
   .tarot-card.soda-card{
