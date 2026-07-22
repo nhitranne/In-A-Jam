@@ -468,35 +468,6 @@
   .quick-order .story-name{ text-align:center; font-size:1.5rem; margin-top:6px; }
   .quick-order .story-tag{ text-align:center; font-family:'Fraunces',serif; font-style:italic; color:var(--gold-deep); font-size:1.02rem; }
 
-  /* ---- tea cards (Trà mứt xíu): same tall photo frame style as soda cards ---- */
-  .tarot-card.tea-card{
-    padding:0;
-    overflow:hidden;
-    justify-content:flex-start;
-  }
-  .tea-card .card-photo{
-    position:relative; z-index:1;
-    width:100%; height:56%;
-    border-radius:18.5px 18.5px 0 0;
-    overflow:hidden;
-  }
-  .tea-card .card-photo img{
-    width:100%; height:100%; object-fit:contain; display:block;
-    transition:transform .5s cubic-bezier(.22,1,.36,1);
-  }
-  .tarot-card.tea-card:hover .card-photo img, .tarot-card.tea-card.active .card-photo img{
-    transform:scale(1.06);
-  }
-  .tea-card .card-content{
-    position:relative; z-index:1; flex:1; width:100%;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    text-align:center; padding:16px 14px 18px;
-  }
-  .tea-card .card-name{ margin-bottom:6px; }
-  .tea-card .card-mood{ margin-top:auto; padding-top:14px; border-top:1px dashed var(--line-gold); line-height:1.5; width:100%; }
-
-
-
   /* ---- soda cards: tall photo frame instead of the round tea photo ---- */
   .tarot-card.soda-card{
     padding:0;
@@ -726,6 +697,17 @@
 </style>
 </head>
 <body>
+
+<div id="fileProtocolWarning" style="display:none; position:fixed; top:0; left:0; right:0; z-index:999; background:#C0392B; color:#fff; text-align:center; padding:12px 16px; font-family:'Be Vietnam Pro', sans-serif; font-size:.9rem; font-weight:600;">
+  ⚠️ Trang này đang mở trực tiếp từ file (file://), nên giỏ hàng KHÔNG đồng bộ được giữa các trang. Vui lòng chạy site qua local server (VD: Live Server / <code>python -m http.server</code>) hoặc host thật, rồi mở lại.
+</div>
+<script>
+  if(window.location.protocol === 'file:'){
+    document.getElementById('fileProtocolWarning').style.display = 'block';
+    document.body.style.paddingTop = '48px';
+    console.warn('[In A Jam] Bạn đang mở trang bằng file:// — localStorage sẽ KHÔNG dùng chung giữa các trang HTML. Hãy chạy qua local server hoặc host thật.');
+  }
+</script>
 
 <header>
   <div class="nav-wrap">
@@ -1048,19 +1030,19 @@ const PRODUCTS = [
 /* ============ SUMMER COLLECTION DATA (soda) ============ */
 const SUMMER_PRODUCTS = [
   {
-    id:'soda-xoai', fruit:'xoai', name:'Soda Xoài', sub:'Ngọt thơm xoài mọng, xua tan nắng hè',
+    id:'soda-xoai', fruit:'xoai', name:'Soda Xoài', sub:'Ngọt ngào, rực rỡ như nắng hè',
     color:'#E7A93B', halo:'rgba(255,215,106,.6)', price:30000, img: IMG_soda_xoai
   },
   {
-    id:'soda-chanhday', fruit:'chanhday', name:'Soda Chanh Dây', sub:'Bùng nổ vị giác, bật mood mùa hè',
+    id:'soda-chanhday', fruit:'chanhday', name:'Soda Chanh Dây', sub:'Chua thanh, sảng khoái tức thì',
     color:'#D98A3D', halo:'rgba(247,217,76,.55)', price:30000, img: IMG_soda_chanhday
   },
   {
-    id:'soda-thom', fruit:'thom', name:'Soda Thơm', sub:'Đậm vị thơm ngát, đậm chất ngày hè',
+    id:'soda-thom', fruit:'thom', name:'Soda Thơm', sub:'Thanh mát, bùng nổ vị nhiệt đới',
     color:'#8FA47A', halo:'rgba(220,232,213,.75)', price:30000, img: IMG_soda_thom
   },
   {
-    id:'soda-man', fruit:'man', name:'Soda Mận', sub:'Chua ngọt bùng vị, mát lạnh ngày hè ',
+    id:'soda-man', fruit:'man', name:'Soda Mận', sub:'Ngọt dịu, chua nhẹ đầy cuốn hút',
     color:'#A8608F', halo:'rgba(233,184,210,.7)', price:30000, img: IMG_soda_man
   }
 ];
@@ -1097,16 +1079,17 @@ function fruitHaloHtml(product){
 
 function renderCards(){
   cardRow.innerHTML = PRODUCTS.map(p => `
-    <button class="tarot-card tea-card" data-id="${p.id}" aria-label="${p.name}">
+    <button class="tarot-card" data-id="${p.id}" aria-label="${p.name}">
       ${fruitHaloHtml(p)}
+      <div class="card-halo" style="background:radial-gradient(circle, ${p.halo}, transparent 70%);"></div>
+      <svg class="corner-glyph tl"><use href="#ic-star"/></svg>
+      <svg class="corner-glyph tr"><use href="#ic-moon"/></svg>
       <svg class="corner-glyph bl"><use href="#ic-sun"/></svg>
       <svg class="corner-glyph br"><use href="#ic-sparkle"/></svg>
-      <div class="card-photo"><img src="${p.img}" alt="${p.name}" loading="lazy"></div>
-      <div class="card-content">
-        <div class="card-name">${p.name}</div>
-        <div class="card-sub">${p.sub}</div>
-        <div class="card-mood">${p.mood}</div>
-      </div>
+      <div class="card-fruit"><img src="${p.img}" alt="${p.name}" loading="lazy"></div>
+      <div class="card-name">${p.name}</div>
+      <div class="card-sub">${p.sub}</div>
+      <div class="card-mood">${p.mood}</div>
     </button>
   `).join('');
 
